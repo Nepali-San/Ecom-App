@@ -28,7 +28,10 @@ class _LoginPage extends State<LoginPage> {
   Widget _buildEmailTextfield() {
     return TextFormField(
       decoration: InputDecoration(
-          labelText: "Email", filled: true, fillColor: Colors.white),
+        labelText: "Email",
+        filled: true,
+        fillColor: Colors.white,
+      ),
       onSaved: (String value) {
         _formData['email'] = value;
       },
@@ -45,7 +48,10 @@ class _LoginPage extends State<LoginPage> {
   Widget _buildPasswordTextfield() {
     return TextFormField(
         decoration: InputDecoration(
-            labelText: "Password", filled: true, fillColor: Colors.white),
+          labelText: "Password",
+          filled: true,
+          fillColor: Colors.white,
+        ),
         obscureText: true,
         onSaved: (String value) {
           _formData['password'] = value;
@@ -72,7 +78,7 @@ class _LoginPage extends State<LoginPage> {
       return;
     }
     _formKey.currentState.save();
-    login(_formData['email'],_formData['password']);
+    login(_formData['email'], _formData['password']);
     Navigator.pushReplacementNamed(context, "/products");
   }
 
@@ -99,14 +105,10 @@ class _LoginPage extends State<LoginPage> {
                 child: Column(
                   children: <Widget>[
                     _buildEmailTextfield(),
-                    SizedBox(
-                      height: 10.0,
-                    ),
+                    SizedBox(height: 10.0),
                     _buildPasswordTextfield(),
                     _buildAcceptSwitch(),
-                    SizedBox(
-                      height: 10.0,
-                    ),
+                    SizedBox(height: 10.0),
                     ScopedModelDescendant<MainModel>(
                       builder: (BuildContext context, Widget child,
                           MainModel model) {
