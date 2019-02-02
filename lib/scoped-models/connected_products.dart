@@ -94,7 +94,11 @@ mixin ProductModel on ConnectedProducts {
   Future<bool> deleteProduct() {
     _isLoading = true;
     final deletedProductId = selectedProduct.id;
-    _products.removeAt(selectedProductIndex);
+
+    int backupIndex = selectedProductIndex;
+    Product backup = _products[backupIndex];
+
+    _products.removeAt(backupIndex);
     _selProductId = null;
     notifyListeners();
     return http
@@ -102,15 +106,11 @@ mixin ProductModel on ConnectedProducts {
             'https://flutter-products-ec3de.firebaseio.com/products/$deletedProductId.json')
         .then((http.Response response) {
       _isLoading = false;
-      int selectedProductIndex = _products.indexWhere((Product product) {
-        return product.id == _selProductId;
-      });
-      _products.removeAt(selectedProductIndex);
-      _selProductId = null;
       notifyListeners();
       return true;
     }).catchError((error) {
-      _isLoading = false;
+      _isLoading = false;      
+      _products.insert(backupIndex, backup);
       notifyListeners();
       return false;
     });
@@ -149,10 +149,6 @@ mixin ProductModel on ConnectedProducts {
           userEmail: _authenticatedUser.email,
           image:
               "https://www.popsci.com/sites/popsci.com/files/styles/1000_1x_/public/images/2018/02/valentines-day-2057745_1920.jpg?itok=IFpejN6h&fc=50,50");
-
-      int selectedProductIndex = _products.indexWhere((Product product) {
-        return product.id == _selProductId;
-      });
 
       _products[selectedProductIndex] = updatedProduct;
 
