@@ -133,7 +133,7 @@ class _EditProduct extends State<EditProduct> {
             builder: (BuildContext context) {
               return AlertDialog(
                 title: Text("Something Went Wrong !!!"),
-                content: Text("Try adding products again"),
+                content: Text("Try editing products later"),
                 actions: <Widget>[
                   FlatButton(
                     onPressed: () {
@@ -162,7 +162,7 @@ class _EditProduct extends State<EditProduct> {
             builder: (BuildContext context) {
               return AlertDialog(
                 title: Text("Something Went Wrong !!!"),
-                content: Text("Try adding products again"),
+                content: Text("Try adding products later"),
                 actions: <Widget>[
                   FlatButton(
                     onPressed: () {
