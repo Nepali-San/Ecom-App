@@ -26,7 +26,7 @@ class _MyAppState extends State<MyApp> {
     return ScopedModel<MainModel>(
       model: mainModel,
       child: MaterialApp(
-        debugShowCheckedModeBanner: false,
+        // debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.red,
           accentColor: Colors.greenAccent,
