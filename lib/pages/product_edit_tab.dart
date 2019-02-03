@@ -112,6 +112,26 @@ class _EditProduct extends State<EditProduct> {
     );
   }
 
+  void dialogonFailure(String msg) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Something Went Wrong !!!"),
+          content: Text(msg),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text("Okay !"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _submitForm(
       Function addProduct, Function updateProduct, Function selectProduct,
       [int selectedProductIndex]) {
@@ -128,23 +148,7 @@ class _EditProduct extends State<EditProduct> {
         if (isSuccess) {
           Navigator.pushReplacementNamed(context, '/products');
         } else {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text("Something Went Wrong !!!"),
-                content: Text("Try editing products later"),
-                actions: <Widget>[
-                  FlatButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text("Okay !"),
-                  ),
-                ],
-              );
-            },
-          );
+          dialogonFailure("Try editing products later");
         }
       });
     } else {
@@ -157,23 +161,7 @@ class _EditProduct extends State<EditProduct> {
         if (isSuccess) {
           Navigator.pushReplacementNamed(context, '/products');
         } else {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text("Something Went Wrong !!!"),
-                content: Text("Try adding products later"),
-                actions: <Widget>[
-                  FlatButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text("Okay !"),
-                  ),
-                ],
-              );
-            },
-          );
+          dialogonFailure("Try adding products later");
         }
       });
     }
