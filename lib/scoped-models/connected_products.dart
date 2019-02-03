@@ -109,7 +109,7 @@ mixin ProductModel on ConnectedProducts {
       notifyListeners();
       return true;
     }).catchError((error) {
-      _isLoading = false;      
+      _isLoading = false;
       _products.insert(backupIndex, backup);
       notifyListeners();
       return false;
@@ -237,6 +237,35 @@ mixin UserModel on ConnectedProducts {
   void login(String email, String password) {
     _authenticatedUser =
         new User(id: 'idnumberone', email: email, password: password);
+  }
+
+  Future<Map<String, dynamic>> signup(String email, String password) async {
+    final Map<String, dynamic> authData = {
+      'email': email,
+      'password': password,
+      'returnSecureToken': true,
+    };
+    final http.Response response = await http.post(
+        "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyB3mdnqefEFT7Hih8U62iO3EBDCw5XnwJA",
+        body: json.encode(authData),
+        headers: {'Content-Type': 'application/json'});
+
+    print(json.decode(response.body));
+    final Map<String, dynamic> info = json.decode(response.body);
+    bool hasError = true;
+    String msg = "Something went wrong";
+
+    if (info.containsKey('idToken')) {
+      hasError = false;
+      msg = 'Authetication succeeded';
+    } else if (info['error']['message'] == 'EMAIL_EXISTS') {
+      msg = 'Email already used !!!';
+    }
+
+    return {
+      'success': !hasError,
+      'message': msg,
+    };
   }
 }
 

@@ -39,7 +39,7 @@ class _LoginPage extends State<LoginPage> {
         fillColor: Colors.white,
       ),
       onSaved: (String value) {
-        _formData['email'] = value;
+        _formData['email'] = value.trim();
       },
       validator: (String value) {
         if (value.isEmpty ||
@@ -96,13 +96,39 @@ class _LoginPage extends State<LoginPage> {
     );
   }
 
-  void _buildSubmitform(Function login) {
+  void _buildSubmitform(Function login, Function signup) async {
     if (!_formKey.currentState.validate() || !_formData['acceptTerms']) {
       return;
     }
     _formKey.currentState.save();
-    login(_formData['email'], _formData['password']);
-    Navigator.pushReplacementNamed(context, "/products");
+    if (_authMode == AuthMode.Login) {
+      login(_formData['email'], _formData['password']);
+      Navigator.pushReplacementNamed(context, "/products");
+    } else {
+      final Map<String, dynamic> successInfo =
+          await signup(_formData['email'], _formData['password']);
+      if (successInfo['success']) {
+        Navigator.pushReplacementNamed(context, "/products");
+      } else {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("An Error occured !!!"),
+              content: Text(successInfo['message']),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("Okay"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                )
+              ],
+            );
+          },
+        );
+      }
+    }
   }
 
   @override
@@ -154,7 +180,8 @@ class _LoginPage extends State<LoginPage> {
                         return RaisedButton(
                           color: Theme.of(context).primaryColor,
                           child: Text("Login"),
-                          onPressed: () => _buildSubmitform(model.login),
+                          onPressed: () =>
+                              _buildSubmitform(model.login, model.signup),
                         );
                       },
                     ),
