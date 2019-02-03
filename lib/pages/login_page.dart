@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:practise_app1/scoped-models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
 
+enum AuthMode { Signup, Login }
+
 class LoginPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _LoginPage();
@@ -13,6 +15,10 @@ class _LoginPage extends State<LoginPage> {
     'password': null,
     'acceptTerms': false,
   };
+
+  AuthMode _authMode = AuthMode.Login;
+
+  final TextEditingController _passwordTextController = TextEditingController();
 
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -47,18 +53,35 @@ class _LoginPage extends State<LoginPage> {
 
   Widget _buildPasswordTextfield() {
     return TextFormField(
+      decoration: InputDecoration(
+        labelText: "Password",
+        filled: true,
+        fillColor: Colors.white,
+      ),
+      obscureText: true,
+      controller: _passwordTextController,
+      onSaved: (String value) {
+        _formData['password'] = value;
+      },
+      validator: (String value) {
+        if (value.isEmpty && value.length < 6) {
+          return "Invalid password !!!";
+        }
+      },
+    );
+  }
+
+  Widget _buildConfirmPasswordTextfield() {
+    return TextFormField(
         decoration: InputDecoration(
-          labelText: "Password",
+          labelText: "Confirm Password",
           filled: true,
           fillColor: Colors.white,
         ),
         obscureText: true,
-        onSaved: (String value) {
-          _formData['password'] = value;
-        },
         validator: (String value) {
-          if (value.isEmpty && value.length < 6) {
-            return "Invalid password !!!";
+          if (value != _passwordTextController.text) {
+            return "password do not match!!!";
           }
         });
   }
@@ -107,8 +130,24 @@ class _LoginPage extends State<LoginPage> {
                     _buildEmailTextfield(),
                     SizedBox(height: 10.0),
                     _buildPasswordTextfield(),
+                    SizedBox(height: 10.0),
+                    _authMode == AuthMode.Signup
+                        ? _buildConfirmPasswordTextfield()
+                        : Container(),
+                    SizedBox(height: 10.0),
                     _buildAcceptSwitch(),
                     SizedBox(height: 10.0),
+                    FlatButton(
+                      child: Text(
+                          "Switch to ${_authMode == AuthMode.Login ? 'Signup' : 'Login'}"),
+                      onPressed: () {
+                        setState(() {
+                          _authMode = _authMode == AuthMode.Login
+                              ? AuthMode.Signup
+                              : AuthMode.Login;
+                        });
+                      },
+                    ),
                     ScopedModelDescendant<MainModel>(
                       builder: (BuildContext context, Widget child,
                           MainModel model) {
