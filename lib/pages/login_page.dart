@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:practise_app1/scoped-models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
-
-enum AuthMode { Signup, Login }
+import '../models/auth.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -96,38 +95,41 @@ class _LoginPage extends State<LoginPage> {
     );
   }
 
-  void _buildSubmitform(Function login, Function signup) async {
+  void _buildSubmitform(Function authenticate) async {
     if (!_formKey.currentState.validate() || !_formData['acceptTerms']) {
       return;
     }
+
     _formKey.currentState.save();
-    if (_authMode == AuthMode.Login) {
-      login(_formData['email'], _formData['password']);
+
+    Map<String, dynamic> successInfo;
+
+    successInfo = await authenticate(
+      _formData['email'],
+      _formData['password'],
+      _authMode,
+    );
+
+    if (successInfo['success']) {
       Navigator.pushReplacementNamed(context, "/products");
     } else {
-      final Map<String, dynamic> successInfo =
-          await signup(_formData['email'], _formData['password']);
-      if (successInfo['success']) {
-        Navigator.pushReplacementNamed(context, "/products");
-      } else {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text("An Error occured !!!"),
-              content: Text(successInfo['message']),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text("Okay"),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                )
-              ],
-            );
-          },
-        );
-      }
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("An Error occured !!!"),
+            content: Text(successInfo['message']),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Okay"),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          );
+        },
+      );
     }
   }
 
@@ -138,7 +140,7 @@ class _LoginPage extends State<LoginPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Login"),
+        title: Text(_authMode == AuthMode.Login ? "Login" : "Sign Up"),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -177,12 +179,16 @@ class _LoginPage extends State<LoginPage> {
                     ScopedModelDescendant<MainModel>(
                       builder: (BuildContext context, Widget child,
                           MainModel model) {
-                        return RaisedButton(
-                          color: Theme.of(context).primaryColor,
-                          child: Text("Login"),
-                          onPressed: () =>
-                              _buildSubmitform(model.login, model.signup),
-                        );
+                        return model.isLoading
+                            ? CircularProgressIndicator()
+                            : RaisedButton(
+                                color: Theme.of(context).primaryColor,
+                                child: Text(_authMode == AuthMode.Login
+                                    ? "Login"
+                                    : "Sign Up"),
+                                onPressed: () =>
+                                    _buildSubmitform(model.authenticate),
+                              );
                       },
                     ),
                   ],

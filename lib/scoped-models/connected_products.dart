@@ -3,6 +3,7 @@ import 'package:practise_app1/models/user.dart';
 import 'package:http/http.dart' as http;
 import 'package:scoped_model/scoped_model.dart';
 import 'dart:convert';
+import '../models/auth.dart';
 
 class ConnectedProducts extends Model {
   List<Product> _products = [];
@@ -234,33 +235,49 @@ mixin ProductModel on ConnectedProducts {
 }
 
 mixin UserModel on ConnectedProducts {
-  void login(String email, String password) {
-    _authenticatedUser =
-        new User(id: 'idnumberone', email: email, password: password);
-  }
+  
+  Future<Map<String, dynamic>> authenticate(String email, String password,
+      [authmode = AuthMode.Login]) async {
+    _isLoading = true;
+    notifyListeners();
 
-  Future<Map<String, dynamic>> signup(String email, String password) async {
     final Map<String, dynamic> authData = {
       'email': email,
       'password': password,
       'returnSecureToken': true,
     };
-    final http.Response response = await http.post(
-        "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyB3mdnqefEFT7Hih8U62iO3EBDCw5XnwJA",
-        body: json.encode(authData),
-        headers: {'Content-Type': 'application/json'});
 
-    print(json.decode(response.body));
-    final Map<String, dynamic> info = json.decode(response.body);
+    http.Response responseData;
+    if (authmode == AuthMode.Login) {
+      responseData = await http.post(
+        "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyB3mdnqefEFT7Hih8U62iO3EBDCw5XnwJA",
+        body: json.encode(authData),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } else {
+      responseData = await http.post(
+          "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyB3mdnqefEFT7Hih8U62iO3EBDCw5XnwJA",
+          body: json.encode(authData),
+          headers: {'Content-Type': 'application/json'});
+    }
+
+    final Map<String, dynamic> info = json.decode(responseData.body);
     bool hasError = true;
     String msg = "Something went wrong";
 
     if (info.containsKey('idToken')) {
       hasError = false;
       msg = 'Authetication succeeded';
+    } else if (info['error']['message'] == 'EMAIL_NOT_FOUND') {
+      msg = 'This email id was not found !!!';
+    } else if (info['error']['message'] == 'INVALID_PASSWORD') {
+      msg = 'Your password is not valid !!!';
     } else if (info['error']['message'] == 'EMAIL_EXISTS') {
       msg = 'Email already used !!!';
     }
+
+    _isLoading = false;
+    notifyListeners();
 
     return {
       'success': !hasError,
