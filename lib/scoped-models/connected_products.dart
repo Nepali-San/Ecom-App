@@ -28,7 +28,7 @@ class ConnectedProducts extends Model {
 
     try {
       final http.Response response = await http.post(
-          'https://flutter-products-ec3de.firebaseio.com/products.json',
+          'https://flutter-products-ec3de.firebaseio.com/products.json?auth=${_authenticatedUser.token}',
           body: json.encode(productData));
 
       if (response.statusCode != 200 && response.statusCode != 201) {
@@ -104,7 +104,7 @@ mixin ProductModel on ConnectedProducts {
     notifyListeners();
     return http
         .delete(
-            'https://flutter-products-ec3de.firebaseio.com/products/$deletedProductId.json')
+            'https://flutter-products-ec3de.firebaseio.com/products/$deletedProductId.json?auth=${_authenticatedUser.token}')
         .then((http.Response response) {
       _isLoading = false;
       notifyListeners();
@@ -138,7 +138,7 @@ mixin ProductModel on ConnectedProducts {
 
     return http
         .put(
-            'https://flutter-products-ec3de.firebaseio.com/products/${selectedProduct.id}.json',
+            'https://flutter-products-ec3de.firebaseio.com/products/${selectedProduct.id}.json?auth=${_authenticatedUser.token}',
             body: json.encode(updateProduct))
         .then((http.Response response) {
       Product updatedProduct = new Product(
@@ -200,7 +200,7 @@ mixin ProductModel on ConnectedProducts {
     notifyListeners();
 
     return http
-        .get('https://flutter-products-ec3de.firebaseio.com/products.json')
+        .get('https://flutter-products-ec3de.firebaseio.com/products.json?auth=${_authenticatedUser.token}')
         .then<Null>((http.Response response) {
       final List<Product> fetchedProductList = [];
       final Map<String, dynamic> productListData = json.decode(response.body);
@@ -235,7 +235,6 @@ mixin ProductModel on ConnectedProducts {
 }
 
 mixin UserModel on ConnectedProducts {
-  
   Future<Map<String, dynamic>> authenticate(String email, String password,
       [authmode = AuthMode.Login]) async {
     _isLoading = true;
@@ -267,7 +266,11 @@ mixin UserModel on ConnectedProducts {
 
     if (info.containsKey('idToken')) {
       hasError = false;
-      msg = 'Authetication succeeded';
+      msg = 'Authentication succeeded';
+
+      _authenticatedUser =
+          User(id: info['localId'], email: email, token: info['idToken']);
+
     } else if (info['error']['message'] == 'EMAIL_NOT_FOUND') {
       msg = 'This email id was not found !!!';
     } else if (info['error']['message'] == 'INVALID_PASSWORD') {
