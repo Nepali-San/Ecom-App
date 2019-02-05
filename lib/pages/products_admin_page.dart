@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:practise_app1/Widgets/ui_elements/logout_listtile.dart';
 import 'package:practise_app1/pages/product_edit_tab.dart';
 import 'package:practise_app1/pages/product_list_tab.dart';
 import 'package:practise_app1/scoped-models/main.dart';
@@ -22,7 +23,9 @@ class AdminPage extends StatelessWidget {
             onTap: () {
               Navigator.pushReplacementNamed(context, '/products');
             },
-          )
+          ),
+          Divider(),
+          LogoutListTile(),
         ],
       ),
     );
