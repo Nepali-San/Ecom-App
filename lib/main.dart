@@ -31,19 +31,14 @@ class _MyAppState extends State<MyApp> {
     return ScopedModel<MainModel>(
       model: _model,
       child: MaterialApp(
-        // debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.red,
           accentColor: Colors.greenAccent,
         ),
         routes: {
-          '/': (BuildContext context) => ScopedModelDescendant<MainModel>(
-                builder: (BuildContext context, Widget child, MainModel model) {
-                  return model.user == null
-                      ? LoginPage()
-                      : ProductsPage(_model);
-                },
-              ),
+          '/': (BuildContext context) =>
+              _model.user == null ? LoginPage() : ProductsPage(_model),
           '/products': (BuildContext context) => ProductsPage(_model),
           '/admin': (BuildContext context) => AdminPage(_model),
           '/editProduct': (BuildContext context) => EditProduct(),

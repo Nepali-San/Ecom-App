@@ -5,6 +5,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'dart:convert';
 import '../models/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
 
 class ConnectedProducts extends Model {
   List<Product> _products = [];
@@ -237,11 +238,11 @@ mixin ProductModel on ConnectedProducts {
 }
 
 mixin UserModel on ConnectedProducts {
+  Timer _authTimer;
 
-  User get user{
+  User get user {
     return _authenticatedUser;
   }
-
 
   Future<Map<String, dynamic>> authenticate(String email, String password,
       [authmode = AuthMode.Login]) async {
@@ -281,11 +282,16 @@ mixin UserModel on ConnectedProducts {
         token: info['idToken'],
       );
 
-      final SharedPreferences prefs =  await SharedPreferences.getInstance();
+      setAuthTimeout(int.parse(info['expiresIn']));
+
+      final DateTime now = DateTime.now();
+      final DateTime expirytime =
+          now.add(Duration(seconds: int.parse(info['expiresIn'])));
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString("token", info['idToken']);
       prefs.setString("id", info['localId']);
       prefs.setString("email", email);
-
+      prefs.setString("expiryTime", expirytime.toIso8601String());
     } else if (info['error']['message'] == 'EMAIL_NOT_FOUND') {
       msg = 'This email id was not found !!!';
     } else if (info['error']['message'] == 'INVALID_PASSWORD') {
@@ -303,25 +309,48 @@ mixin UserModel on ConnectedProducts {
     };
   }
 
-  void autoAuth() async{
+  void autoAuth() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String token = prefs.getString('token');
-    if(token != null){
+    final String expiryTime = prefs.getString("expirytime");
+
+    if (token != null) {
+      final DateTime now = DateTime.now();
+      final DateTime expiryEimeParsed = DateTime.parse(expiryTime);
+      if (expiryEimeParsed.isBefore(now)) {
+        _authenticatedUser = null;
+        notifyListeners();
+        return;
+      }
       final String id = prefs.getString('id');
       final String email = prefs.getString('email');
+      final int tokenLifeSpans = expiryEimeParsed.difference(now).inSeconds;
 
-       _authenticatedUser = User(
+      _authenticatedUser = User(
         id: id,
         email: email,
         token: token,
       );
+
+      setAuthTimeout(tokenLifeSpans);
+
       notifyListeners();
     }
-
   }
 
-}
+  void logout() async {
+    _authenticatedUser = null;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('token');
+    prefs.remove('email');
+    prefs.remove('id');
+    _authTimer.cancel();
+  }
 
+  void setAuthTimeout(int time) {
+    _authTimer = Timer(Duration(seconds: time), logout);
+  }
+}
 
 mixin UtilityModel on ConnectedProducts {
   bool get isLoading {
