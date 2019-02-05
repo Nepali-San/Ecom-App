@@ -146,7 +146,7 @@ class _EditProduct extends State<EditProduct> {
         _formData['price'],
       ).then((bool isSuccess) {
         if (isSuccess) {
-          Navigator.pushReplacementNamed(context, '/products');
+          Navigator.pushReplacementNamed(context, '/');
         } else {
           dialogonFailure("Try editing products later");
         }
@@ -159,7 +159,7 @@ class _EditProduct extends State<EditProduct> {
         _formData['price'],
       ).then((bool isSuccess) {
         if (isSuccess) {
-          Navigator.pushReplacementNamed(context, '/products');
+          Navigator.pushReplacementNamed(context, '/');
         } else {
           dialogonFailure("Try adding products later");
         }

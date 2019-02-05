@@ -20,9 +20,16 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   MainModel _model = MainModel();
 
+  bool _isAuthenticated = false;
+
   @override
   void initState() {
     _model.autoAuth();
+    _model.userSubject.listen((bool isAuthenticated) {
+      setState(() {
+        _isAuthenticated = isAuthenticated;
+      });
+    });
     super.initState();
   }
 
@@ -38,12 +45,18 @@ class _MyAppState extends State<MyApp> {
         ),
         routes: {
           '/': (BuildContext context) =>
-              _model.user == null ? LoginPage() : ProductsPage(_model),
-          '/products': (BuildContext context) => ProductsPage(_model),
-          '/admin': (BuildContext context) => AdminPage(_model),
-          '/editProduct': (BuildContext context) => EditProduct(),
+              !_isAuthenticated ? LoginPage() : ProductsPage(_model),
+          '/admin': (BuildContext context) =>
+              !_isAuthenticated ? LoginPage() : AdminPage(_model),
+          '/editProduct': (BuildContext context) =>
+              !_isAuthenticated ? LoginPage() : EditProduct(),
         },
         onGenerateRoute: (RouteSettings settings) {
+          if (!_isAuthenticated) {
+            return MaterialPageRoute<bool>(
+              builder: (BuildContext context) => LoginPage(),
+            );
+          }
           final List<String> pathElements = settings.name.split('/');
 
           if (pathElements[0] != '') return null;
@@ -54,7 +67,7 @@ class _MyAppState extends State<MyApp> {
             _model.selectProduct(productId);
             return MaterialPageRoute<bool>(
               builder: (BuildContext context) {
-                return ProductPage();
+                return !_isAuthenticated ? LoginPage() : ProductPage();
               },
             );
           }
@@ -63,7 +76,8 @@ class _MyAppState extends State<MyApp> {
         },
         onUnknownRoute: (RouteSettings settings) {
           return MaterialPageRoute(
-            builder: (BuildContext context) => UnknownPage(),
+            builder: (BuildContext context) =>
+                !_isAuthenticated ? LoginPage() : UnknownPage(),
           );
         },
       ),

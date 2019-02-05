@@ -5,6 +5,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'dart:convert';
 import '../models/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:rxdart/subjects.dart';
 import 'dart:async';
 
 class ConnectedProducts extends Model {
@@ -240,6 +241,12 @@ mixin ProductModel on ConnectedProducts {
 mixin UserModel on ConnectedProducts {
   Timer _authTimer;
 
+  PublishSubject<bool> _userSubject = PublishSubject();
+
+  PublishSubject<bool> get userSubject{
+    return _userSubject;
+  }
+
   User get user {
     return _authenticatedUser;
   }
@@ -270,6 +277,7 @@ mixin UserModel on ConnectedProducts {
     }
 
     final Map<String, dynamic> info = json.decode(responseData.body);
+    
     bool hasError = true;
     String msg = "Something went wrong";
 
@@ -282,6 +290,8 @@ mixin UserModel on ConnectedProducts {
         token: info['idToken'],
       );
 
+      _userSubject.add(true);
+      print("this is expiry " + info['expiresIn']);
       setAuthTimeout(int.parse(info['expiresIn']));
 
       final DateTime now = DateTime.now();
@@ -292,6 +302,9 @@ mixin UserModel on ConnectedProducts {
       prefs.setString("id", info['localId']);
       prefs.setString("email", email);
       prefs.setString("expiryTime", expirytime.toIso8601String());
+
+      print("this is expiry on sp" + expirytime.toIso8601String());
+
     } else if (info['error']['message'] == 'EMAIL_NOT_FOUND') {
       msg = 'This email id was not found !!!';
     } else if (info['error']['message'] == 'INVALID_PASSWORD') {
@@ -310,21 +323,27 @@ mixin UserModel on ConnectedProducts {
   }
 
   void autoAuth() async {
+
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String token = prefs.getString('token');
-    final String expiryTime = prefs.getString("expirytime");
+    final String expiryTime = prefs.getString("expiryTime");
+
+    print("Auto login");
 
     if (token != null) {
       final DateTime now = DateTime.now();
-      final DateTime expiryEimeParsed = DateTime.parse(expiryTime);
-      if (expiryEimeParsed.isBefore(now)) {
+      print(expiryTime);
+      final DateTime expiryTimeParsed = DateTime.parse(expiryTime);
+      if (expiryTimeParsed.isBefore(now)) {
         _authenticatedUser = null;
+        print("old token");
         notifyListeners();
         return;
       }
+
       final String id = prefs.getString('id');
       final String email = prefs.getString('email');
-      final int tokenLifeSpans = expiryEimeParsed.difference(now).inSeconds;
+      final int tokenLifeSpans = expiryTimeParsed.difference(now).inSeconds;
 
       _authenticatedUser = User(
         id: id,
@@ -332,6 +351,7 @@ mixin UserModel on ConnectedProducts {
         token: token,
       );
 
+      _userSubject.add(true);
       setAuthTimeout(tokenLifeSpans);
 
       notifyListeners();
@@ -340,15 +360,17 @@ mixin UserModel on ConnectedProducts {
 
   void logout() async {
     _authenticatedUser = null;
+    _authTimer.cancel();
+    _userSubject.add(false);
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('token');
     prefs.remove('email');
-    prefs.remove('id');
-    _authTimer.cancel();
+    prefs.remove('id');  
+    
   }
 
   void setAuthTimeout(int time) {
-    _authTimer = Timer(Duration(seconds: time), logout);
+    _authTimer = Timer(Duration(seconds: time),logout);
   }
 }
 

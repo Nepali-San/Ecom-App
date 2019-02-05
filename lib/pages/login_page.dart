@@ -111,7 +111,7 @@ class _LoginPage extends State<LoginPage> {
     );
 
     if (successInfo['success']) {
-      Navigator.pushReplacementNamed(context, "/products");
+      // Navigator.pushReplacementNamed(context, "/");
     } else {
       showDialog(
         context: context,
