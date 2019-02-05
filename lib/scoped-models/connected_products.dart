@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:scoped_model/scoped_model.dart';
 import 'dart:convert';
 import '../models/auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ConnectedProducts extends Model {
   List<Product> _products = [];
@@ -200,7 +201,8 @@ mixin ProductModel on ConnectedProducts {
     notifyListeners();
 
     return http
-        .get('https://flutter-products-ec3de.firebaseio.com/products.json?auth=${_authenticatedUser.token}')
+        .get(
+            'https://flutter-products-ec3de.firebaseio.com/products.json?auth=${_authenticatedUser.token}')
         .then<Null>((http.Response response) {
       final List<Product> fetchedProductList = [];
       final Map<String, dynamic> productListData = json.decode(response.body);
@@ -235,6 +237,12 @@ mixin ProductModel on ConnectedProducts {
 }
 
 mixin UserModel on ConnectedProducts {
+
+  User get user{
+    return _authenticatedUser;
+  }
+
+
   Future<Map<String, dynamic>> authenticate(String email, String password,
       [authmode = AuthMode.Login]) async {
     _isLoading = true;
@@ -267,9 +275,16 @@ mixin UserModel on ConnectedProducts {
     if (info.containsKey('idToken')) {
       hasError = false;
       msg = 'Authentication succeeded';
+      _authenticatedUser = User(
+        id: info['localId'],
+        email: email,
+        token: info['idToken'],
+      );
 
-      _authenticatedUser =
-          User(id: info['localId'], email: email, token: info['idToken']);
+      final SharedPreferences prefs =  await SharedPreferences.getInstance();
+      prefs.setString("token", info['idToken']);
+      prefs.setString("id", info['localId']);
+      prefs.setString("email", email);
 
     } else if (info['error']['message'] == 'EMAIL_NOT_FOUND') {
       msg = 'This email id was not found !!!';
@@ -287,7 +302,26 @@ mixin UserModel on ConnectedProducts {
       'message': msg,
     };
   }
+
+  void autoAuth() async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String token = prefs.getString('token');
+    if(token != null){
+      final String id = prefs.getString('id');
+      final String email = prefs.getString('email');
+
+       _authenticatedUser = User(
+        id: id,
+        email: email,
+        token: token,
+      );
+      notifyListeners();
+    }
+
+  }
+
 }
+
 
 mixin UtilityModel on ConnectedProducts {
   bool get isLoading {

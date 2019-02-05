@@ -18,25 +18,35 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  MainModel _model = MainModel();
 
-  MainModel mainModel = MainModel();
+  @override
+  void initState() {
+    _model.autoAuth();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return ScopedModel<MainModel>(
-      model: mainModel,
+      model: _model,
       child: MaterialApp(
         // debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.red,
           accentColor: Colors.greenAccent,
         ),
-        home: LoginPage(),
         routes: {
-          '/products': (BuildContext context) => ProductsPage(mainModel),
-          '/admin': (BuildContext context) => AdminPage(mainModel),
+          '/': (BuildContext context) => ScopedModelDescendant<MainModel>(
+                builder: (BuildContext context, Widget child, MainModel model) {
+                  return model.user == null
+                      ? LoginPage()
+                      : ProductsPage(_model);
+                },
+              ),
+          '/products': (BuildContext context) => ProductsPage(_model),
+          '/admin': (BuildContext context) => AdminPage(_model),
           '/editProduct': (BuildContext context) => EditProduct(),
-            
         },
         onGenerateRoute: (RouteSettings settings) {
           final List<String> pathElements = settings.name.split('/');
@@ -46,11 +56,11 @@ class _MyAppState extends State<MyApp> {
           if (pathElements[1] == 'product') {
             final String productId = pathElements[2];
 
-            mainModel.selectProduct(productId);
+            _model.selectProduct(productId);
             return MaterialPageRoute<bool>(
               builder: (BuildContext context) {
                 return ProductPage();
-              }, 
+              },
             );
           }
 
