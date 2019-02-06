@@ -70,6 +70,10 @@ mixin ProductModel on ConnectedProducts {
 
   List<Product> get allproducts => List.from(_products);
 
+  List<Product> get myproducts => _products.where((Product product) {
+        return product.userId == _authenticatedUser.id;
+      }).toList();
+
   int get selectedProductIndex {
     if (_selProductId == null) return null;
     return _products.indexWhere((Product product) {
@@ -135,7 +139,7 @@ mixin ProductModel on ConnectedProducts {
       'image':
           "https://www.popsci.com/sites/popsci.com/files/styles/1000_1x_/public/images/2018/02/valentines-day-2057745_1920.jpg?itok=IFpejN6h&fc=50,50",
       'price': price,
-      'userId': selectedProduct.id,
+      'userId': selectedProduct.userId,
       'userEmail': selectedProduct.userEmail,
     };
 
@@ -170,11 +174,13 @@ mixin ProductModel on ConnectedProducts {
     _selProductId = id;
   }
 
-  void toogleFavourite() {
+  void toogleFavourite() async {
     bool isCurrentFavourite = selectedProduct.isFavorite;
     bool newFavouriteStatus = !isCurrentFavourite;
+
+    //updating the product locally , revert it if not success...
     final updatedProduct = new Product(
-        id: selectedProduct.id,
+        id: selectedProductId,
         title: selectedProduct.title,
         image: selectedProduct.image,
         description: selectedProduct.description,
@@ -184,8 +190,38 @@ mixin ProductModel on ConnectedProducts {
         isFavorite: newFavouriteStatus);
 
     _products[selectedProductIndex] = updatedProduct;
-    _selProductId = null;
     notifyListeners();
+
+    http.Response response;
+    if (newFavouriteStatus) {
+      response = await http.put(
+        "https://flutter-products-ec3de.firebaseio.com/products/$selectedProductId/wishListUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}",
+        body: json.encode(true),
+      );
+    } else {
+      response = await http.delete(
+        "https://flutter-products-ec3de.firebaseio.com/products/$selectedProductId/wishListUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}",
+      );
+    }
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      print(json.decode(response.body));
+      //if error on database we revert the local update...
+      final updatedProduct = new Product(
+          id: selectedProductId,
+          title: selectedProduct.title,
+          image: selectedProduct.image,
+          description: selectedProduct.description,
+          price: selectedProduct.price,
+          userEmail: selectedProduct.userEmail,
+          userId: selectedProduct.userId,
+          isFavorite: !newFavouriteStatus);
+
+      _products[selectedProductIndex] = updatedProduct;
+      notifyListeners();
+    }
+
+    _selProductId = null;
   }
 
   void toogelMode() {
@@ -224,9 +260,14 @@ mixin ProductModel on ConnectedProducts {
           price: productData['price'],
           userId: productData['userId'],
           userEmail: productData['userEmail'],
+          isFavorite: productData['wishListUsers'] != null
+              ? (productData['wishListUsers'] as Map<String, dynamic>)
+                  .containsKey(_authenticatedUser.id)
+              : false,
         );
         fetchedProductList.add(product);
       });
+     
       _products = fetchedProductList;
 
       _isLoading = false;
@@ -243,7 +284,7 @@ mixin UserModel on ConnectedProducts {
 
   PublishSubject<bool> _userSubject = PublishSubject();
 
-  PublishSubject<bool> get userSubject{
+  PublishSubject<bool> get userSubject {
     return _userSubject;
   }
 
@@ -277,7 +318,7 @@ mixin UserModel on ConnectedProducts {
     }
 
     final Map<String, dynamic> info = json.decode(responseData.body);
-    
+
     bool hasError = true;
     String msg = "Something went wrong";
 
@@ -304,7 +345,6 @@ mixin UserModel on ConnectedProducts {
       prefs.setString("expiryTime", expirytime.toIso8601String());
 
       print("this is expiry on sp" + expirytime.toIso8601String());
-
     } else if (info['error']['message'] == 'EMAIL_NOT_FOUND') {
       msg = 'This email id was not found !!!';
     } else if (info['error']['message'] == 'INVALID_PASSWORD') {
@@ -323,7 +363,6 @@ mixin UserModel on ConnectedProducts {
   }
 
   void autoAuth() async {
-
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String token = prefs.getString('token');
     final String expiryTime = prefs.getString("expiryTime");
@@ -365,12 +404,11 @@ mixin UserModel on ConnectedProducts {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('token');
     prefs.remove('email');
-    prefs.remove('id');  
-    
+    prefs.remove('id');
   }
 
   void setAuthTimeout(int time) {
-    _authTimer = Timer(Duration(seconds: time),logout);
+    _authTimer = Timer(Duration(seconds: time), logout);
   }
 }
 

@@ -14,7 +14,7 @@ class ListProduct extends StatefulWidget {
 
 class _ListProduct extends State<ListProduct> {
   @override
-  initState() {
+  initState(){
     widget.model.fetchProducts();
     super.initState();
   }
@@ -23,7 +23,7 @@ class _ListProduct extends State<ListProduct> {
     return IconButton(
       icon: Icon(Icons.edit),
       onPressed: () {
-        model.selectProduct(model.allproducts[index].id);
+        model.selectProduct(model.myproducts[index].id);
         Navigator.pushNamed(context, '/editProduct').then((_) {
           model.selectProduct(null);
         });
@@ -33,9 +33,9 @@ class _ListProduct extends State<ListProduct> {
 
   Widget _build(BuildContext context, int index, MainModel model) {
     return Dismissible(
-      key: Key(model.allproducts[index].title),
+      key: Key(model.myproducts[index].title),
       onDismissed: (DismissDirection direction) {
-        model.selectProduct(model.allproducts[index].id);
+        model.selectProduct(model.myproducts[index].id);
         model.deleteProduct().then((bool isSuccess) {
           if (!isSuccess) {
             showDialog(
@@ -65,9 +65,9 @@ class _ListProduct extends State<ListProduct> {
         children: <Widget>[
           ListTile(
             leading: CircleAvatar(
-                backgroundImage: NetworkImage(model.allproducts[index].image)),
-            title: Text(model.allproducts[index].title),
-            subtitle: Text('\$ ${model.allproducts[index].price.toString()}'),
+                backgroundImage: NetworkImage(model.myproducts[index].image)),
+            title: Text(model.myproducts[index].title),
+            subtitle: Text('\$ ${model.myproducts[index].price.toString()}'),
             trailing: _buildEditButton(context, index, model),
           ),
           Divider(),
@@ -80,10 +80,11 @@ class _ListProduct extends State<ListProduct> {
   Widget build(BuildContext context) {
     return ScopedModelDescendant(
       builder: (BuildContext context, Widget child, MainModel model) {
+        print(model.myproducts.length);
         return ListView.builder(
           itemBuilder: (BuildContext context, int index) =>
               _build(context, index, model),
-          itemCount: model.allproducts.length,
+          itemCount: model.myproducts.length,
         );
       },
     );
