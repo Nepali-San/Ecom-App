@@ -67,12 +67,14 @@ class ConnectedProducts extends Model {
 
 mixin ProductModel on ConnectedProducts {
   bool _showFavourites = false;
+  List<Product> _myProducts;
+
+  //use _myProducts to keep a seprate list of product belonging to _authenticate user
+  //rem to update it while updating database.
 
   List<Product> get allproducts => List.from(_products);
 
-  List<Product> get myproducts => _products.where((Product product) {
-        return product.userId == _authenticatedUser.id;
-      }).toList();
+  List<Product> get myproducts => _myProducts;
 
   int get selectedProductIndex {
     if (_selProductId == null) return null;
@@ -99,14 +101,22 @@ mixin ProductModel on ConnectedProducts {
     });
   }
 
+  /*
+    we delete the data from list _myProducts(to update list UI) and from database(as delete is supposed to do it),
+    _products(also _myProducts) will be automatically updated on fetching data when we navigate back to home page.
+  */
+
   Future<bool> deleteProduct() {
     _isLoading = true;
     final deletedProductId = selectedProduct.id;
 
-    int backupIndex = selectedProductIndex;
-    Product backup = _products[backupIndex];
+    int backupIndex = _myProducts.indexWhere((Product product) {
+      return product.id == _selProductId;
+    });
 
-    _products.removeAt(backupIndex);
+    Product backup = _myProducts[backupIndex];
+
+    _myProducts.removeAt(backupIndex);
     _selProductId = null;
     notifyListeners();
     return http
@@ -118,61 +128,62 @@ mixin ProductModel on ConnectedProducts {
       return true;
     }).catchError((error) {
       _isLoading = false;
-      _products.insert(backupIndex, backup);
+      _myProducts.insert(backupIndex, backup);
       notifyListeners();
       return false;
     });
   }
+
+  /*we update original product in database and navigate to homepage 
+  where _myProducts & _products is automatically reloaded so we don't update 
+  those lists as in delete operation*/
 
   Future<bool> updateProduct(
     String title,
     String description,
     String image,
     double price,
-  ) {
+  ) async {
     _isLoading = true;
     notifyListeners();
 
-    final Map<String, dynamic> updateProduct = {
-      'title': title,
-      'description': description,
-      'image':
-          "https://www.popsci.com/sites/popsci.com/files/styles/1000_1x_/public/images/2018/02/valentines-day-2057745_1920.jpg?itok=IFpejN6h&fc=50,50",
-      'price': price,
-      'userId': selectedProduct.userId,
-      'userEmail': selectedProduct.userEmail,
-    };
+    try {
+      //we retrieve the current wishListUsers(users that has favourited this product) and then put it in updated list.
+      http.Response res = await http.get(
+          "https://flutter-products-ec3de.firebaseio.com/products/${selectedProduct.id}/wishListUsers.json?auth=${_authenticatedUser.token}");
 
-    return http
-        .put(
-            'https://flutter-products-ec3de.firebaseio.com/products/${selectedProduct.id}.json?auth=${_authenticatedUser.token}',
-            body: json.encode(updateProduct))
-        .then((http.Response response) {
-      Product updatedProduct = new Product(
-          id: selectedProduct.id,
-          title: title,
-          description: description,
-          price: price,
-          userId: _authenticatedUser.id,
-          userEmail: _authenticatedUser.email,
-          image:
-              "https://www.popsci.com/sites/popsci.com/files/styles/1000_1x_/public/images/2018/02/valentines-day-2057745_1920.jpg?itok=IFpejN6h&fc=50,50");
+      final Map<String, dynamic> updateProduct = {
+        'title': title,
+        'description': description,
+        'image':
+            "https://www.popsci.com/sites/popsci.com/files/styles/1000_1x_/public/images/2018/02/valentines-day-2057745_1920.jpg?itok=IFpejN6h&fc=50,50",
+        'price': price,
+        'userId': selectedProduct.userId,
+        'userEmail': selectedProduct.userEmail,
+        'wishListUsers': json.decode(res.body),
+      };
 
-      _products[selectedProductIndex] = updatedProduct;
+      await http.put(
+          'https://flutter-products-ec3de.firebaseio.com/products/${selectedProduct.id}.json?auth=${_authenticatedUser.token}',
+          body: json.encode(updateProduct));
 
       _isLoading = false;
       notifyListeners();
       return true;
-    }).catchError((error) {
+    } catch (error) {
       _isLoading = false;
       notifyListeners();
       return false;
-    });
+    }
   }
 
   void selectProduct(String id) {
     _selProductId = id;
   }
+
+  /* 
+  _myProducts has no concern with favourite feature so we only update database and (_products).
+  */
 
   void toogleFavourite() async {
     bool isCurrentFavourite = selectedProduct.isFavorite;
@@ -197,6 +208,7 @@ mixin ProductModel on ConnectedProducts {
     _products[selectedProductIndex] = updatedProduct;
     notifyListeners();
 
+    //may use try catch instead of checking the response status code...
     try {
       if (newFavouriteStatus) {
         await http.put(
@@ -227,7 +239,6 @@ mixin ProductModel on ConnectedProducts {
 
   void toogelMode() {
     _showFavourites = !_showFavourites;
-
     notifyListeners();
   }
 
@@ -270,6 +281,10 @@ mixin ProductModel on ConnectedProducts {
 
       _products = fetchedProductList;
 
+      _myProducts = _products.where((Product product) {
+        return product.userId == _authenticatedUser.id;
+      }).toList();
+
       _isLoading = false;
       notifyListeners();
     }).catchError((error) {
@@ -304,17 +319,27 @@ mixin UserModel on ConnectedProducts {
     };
 
     http.Response responseData;
-    if (authmode == AuthMode.Login) {
-      responseData = await http.post(
-        "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyB3mdnqefEFT7Hih8U62iO3EBDCw5XnwJA",
-        body: json.encode(authData),
-        headers: {'Content-Type': 'application/json'},
-      );
-    } else {
-      responseData = await http.post(
-          "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyB3mdnqefEFT7Hih8U62iO3EBDCw5XnwJA",
+    //to handle the error when no internet , i used try catch..
+    try {
+      if (authmode == AuthMode.Login) {
+        responseData = await http.post(
+          "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyB3mdnqefEFT7Hih8U62iO3EBDCw5XnwJA",
           body: json.encode(authData),
-          headers: {'Content-Type': 'application/json'});
+          headers: {'Content-Type': 'application/json'},
+        );
+      } else {
+        responseData = await http.post(
+            "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyB3mdnqefEFT7Hih8U62iO3EBDCw5XnwJA",
+            body: json.encode(authData),
+            headers: {'Content-Type': 'application/json'});
+      }
+    } catch (error) {
+      _isLoading = false;
+      notifyListeners();
+      return {
+        'success': false,
+        'message': "connection problem !!!",
+      };
     }
 
     final Map<String, dynamic> info = json.decode(responseData.body);
