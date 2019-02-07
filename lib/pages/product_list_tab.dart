@@ -12,12 +12,7 @@ class ListProduct extends StatefulWidget {
   }
 }
 
-class _ListProduct extends State<ListProduct> {
-  @override
-  initState(){
-    widget.model.fetchProducts();
-    super.initState();
-  }
+class _ListProduct extends State<ListProduct> { 
 
   Widget _buildEditButton(BuildContext context, int index, MainModel model) {
     return IconButton(
@@ -33,7 +28,7 @@ class _ListProduct extends State<ListProduct> {
 
   Widget _build(BuildContext context, int index, MainModel model) {
     return Dismissible(
-      key: Key(model.myproducts[index].title),
+      key: Key(model.myproducts[index].id),
       onDismissed: (DismissDirection direction) {
         model.selectProduct(model.myproducts[index].id);
         model.deleteProduct().then((bool isSuccess) {
