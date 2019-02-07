@@ -41,12 +41,12 @@ class AdminPage extends StatelessWidget {
             bottom: TabBar(
               tabs: <Widget>[
                 Tab(
-                  icon: Icon(Icons.create),
-                  text: "Create Product",
+                  icon: Icon(Icons.add),
+                  text: "Add Product",
                 ),
                 Tab(
                   icon: Icon(Icons.list),
-                  text: "List Products",
+                  text: "My Products",
                 ),
               ],
             ),
