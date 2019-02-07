@@ -79,8 +79,7 @@ class _ListProduct extends State<ListProduct> {
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant(
-      builder: (BuildContext context, Widget child, MainModel model) {
-        print(model.myproducts.length);
+      builder: (BuildContext context, Widget child, MainModel model) {       
         return ListView.builder(
           itemBuilder: (BuildContext context, int index) =>
               _build(context, index, model),
