@@ -178,6 +178,11 @@ mixin ProductModel on ConnectedProducts {
     bool isCurrentFavourite = selectedProduct.isFavorite;
     bool newFavouriteStatus = !isCurrentFavourite;
 
+    String addLikeUrl =
+        "https://flutter-products-ec3de.firebaseio.com/products/$selectedProductId/wishListUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}";
+    String delLikeUrl =
+        "https://flutter-products-ec3de.firebaseio.com/products/$selectedProductId/wishListUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}";
+
     //updating the product locally , revert it if not success...
     final updatedProduct = new Product(
         id: selectedProductId,
@@ -192,21 +197,18 @@ mixin ProductModel on ConnectedProducts {
     _products[selectedProductIndex] = updatedProduct;
     notifyListeners();
 
-    http.Response response;
-    if (newFavouriteStatus) {
-      response = await http.put(
-        "https://flutter-products-ec3de.firebaseio.com/products/$selectedProductId/wishListUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}",
-        body: json.encode(true),
-      );
-    } else {
-      response = await http.delete(
-        "https://flutter-products-ec3de.firebaseio.com/products/$selectedProductId/wishListUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}",
-      );
-    }
-
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      print(json.decode(response.body));
-      //if error on database we revert the local update...
+    try {
+      if (newFavouriteStatus) {
+        await http.put(
+          addLikeUrl,
+          body: json.encode(true),
+        );
+      } else {
+        await http.delete(
+          delLikeUrl,
+        );
+      }
+    } catch (error) {
       final updatedProduct = new Product(
           id: selectedProductId,
           title: selectedProduct.title,
@@ -220,7 +222,6 @@ mixin ProductModel on ConnectedProducts {
       _products[selectedProductIndex] = updatedProduct;
       notifyListeners();
     }
-
     _selProductId = null;
   }
 
@@ -236,12 +237,11 @@ mixin ProductModel on ConnectedProducts {
 
   Future<Null> fetchProducts() {
     _isLoading = true;
+    String fetchUrl =
+        'https://flutter-products-ec3de.firebaseio.com/products.json?auth=${_authenticatedUser.token}';
     notifyListeners();
 
-    return http
-        .get(
-            'https://flutter-products-ec3de.firebaseio.com/products.json?auth=${_authenticatedUser.token}')
-        .then<Null>((http.Response response) {
+    return http.get(fetchUrl).then<Null>((http.Response response) {
       final List<Product> fetchedProductList = [];
       final Map<String, dynamic> productListData = json.decode(response.body);
 
@@ -267,7 +267,7 @@ mixin ProductModel on ConnectedProducts {
         );
         fetchedProductList.add(product);
       });
-     
+
       _products = fetchedProductList;
 
       _isLoading = false;
@@ -332,7 +332,6 @@ mixin UserModel on ConnectedProducts {
       );
 
       _userSubject.add(true);
-      print("this is expiry " + info['expiresIn']);
       setAuthTimeout(int.parse(info['expiresIn']));
 
       final DateTime now = DateTime.now();
@@ -343,8 +342,6 @@ mixin UserModel on ConnectedProducts {
       prefs.setString("id", info['localId']);
       prefs.setString("email", email);
       prefs.setString("expiryTime", expirytime.toIso8601String());
-
-      print("this is expiry on sp" + expirytime.toIso8601String());
     } else if (info['error']['message'] == 'EMAIL_NOT_FOUND') {
       msg = 'This email id was not found !!!';
     } else if (info['error']['message'] == 'INVALID_PASSWORD') {
@@ -367,11 +364,8 @@ mixin UserModel on ConnectedProducts {
     final String token = prefs.getString('token');
     final String expiryTime = prefs.getString("expiryTime");
 
-    print("Auto login");
-
     if (token != null) {
       final DateTime now = DateTime.now();
-      print(expiryTime);
       final DateTime expiryTimeParsed = DateTime.parse(expiryTime);
       if (expiryTimeParsed.isBefore(now)) {
         _authenticatedUser = null;
