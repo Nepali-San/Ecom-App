@@ -10,6 +10,8 @@ import 'dart:async';
 
 class ConnectedProducts extends Model {
   List<Product> _products = [];
+  List<Product> _myProducts;
+
   String _selProductId;
   User _authenticatedUser;
   bool _isLoading = false;
@@ -32,13 +34,7 @@ class ConnectedProducts extends Model {
     try {
       final http.Response response = await http.post(
           'https://flutter-products-ec3de.firebaseio.com/products.json?auth=${_authenticatedUser.token}',
-          body: json.encode(productData));
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
+          body: json.encode(productData));      
 
       final Map<String, dynamic> responseData = json.decode(response.body);
 
@@ -52,6 +48,8 @@ class ConnectedProducts extends Model {
           image: image);
 
       _products.add(p);
+      _myProducts.add(p);
+
       _selProductId = null;
 
       _isLoading = false;
@@ -66,8 +64,7 @@ class ConnectedProducts extends Model {
 }
 
 mixin ProductModel on ConnectedProducts {
-  bool _showFavourites = false;
-  List<Product> _myProducts;
+  bool _showFavourites = false; 
 
   //use _myProducts to keep a seprate list of product belonging to _authenticate user
   //rem to update it while updating database.
@@ -75,6 +72,8 @@ mixin ProductModel on ConnectedProducts {
   List<Product> get allproducts => List.from(_products);
 
   List<Product> get myproducts => _myProducts;
+
+  void resetMyProducts() => _myProducts.clear();
 
   int get selectedProductIndex {
     if (_selProductId == null) return null;
@@ -114,9 +113,13 @@ mixin ProductModel on ConnectedProducts {
       return product.id == _selProductId;
     });
 
+    int productbackupIndex = selectedProductIndex;
+
     Product backup = _myProducts[backupIndex];
 
     _myProducts.removeAt(backupIndex);
+    _products.removeAt(productbackupIndex);
+  
     _selProductId = null;
     notifyListeners();
     return http
@@ -128,7 +131,10 @@ mixin ProductModel on ConnectedProducts {
       return true;
     }).catchError((error) {
       _isLoading = false;
+
       _myProducts.insert(backupIndex, backup);
+      _products.insert(productbackupIndex, backup);
+
       notifyListeners();
       return false;
     });
@@ -147,6 +153,9 @@ mixin ProductModel on ConnectedProducts {
     _isLoading = true;
     notifyListeners();
 
+    String imgUrl =
+        "https://www.popsci.com/sites/popsci.com/files/styles/1000_1x_/public/images/2018/02/valentines-day-2057745_1920.jpg?itok=IFpejN6h&fc=50,50";
+
     try {
       //we retrieve the current wishListUsers(users that has favourited this product) and then put it in updated list.
       http.Response res = await http.get(
@@ -155,17 +164,36 @@ mixin ProductModel on ConnectedProducts {
       final Map<String, dynamic> updateProduct = {
         'title': title,
         'description': description,
-        'image':
-            "https://www.popsci.com/sites/popsci.com/files/styles/1000_1x_/public/images/2018/02/valentines-day-2057745_1920.jpg?itok=IFpejN6h&fc=50,50",
+        'image': imgUrl,
         'price': price,
         'userId': selectedProduct.userId,
         'userEmail': selectedProduct.userEmail,
         'wishListUsers': json.decode(res.body),
       };
 
+      final Product updatedProductlocal = Product(
+          id: selectedProduct.id,
+          title: title,
+          description: description,
+          price: price,
+          image: imgUrl,
+          userEmail: selectedProduct.userEmail,
+          userId: selectedProduct.userId);
+
       await http.put(
           'https://flutter-products-ec3de.firebaseio.com/products/${selectedProduct.id}.json?auth=${_authenticatedUser.token}',
           body: json.encode(updateProduct));
+
+      //Now update both list locally too...
+
+      _products[selectedProductIndex] = updatedProductlocal;
+
+      //same as above, we are not only having a getter for it...
+      int myProductIndex = _myProducts.indexWhere((Product p){
+        return p.id == selectedProductId;
+      });
+
+      _myProducts[myProductIndex] = updatedProductlocal;
 
       _isLoading = false;
       notifyListeners();
