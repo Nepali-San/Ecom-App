@@ -11,7 +11,9 @@ class LogoutListTile extends StatelessWidget {
         return ListTile(
           leading: Icon(Icons.exit_to_app),
           title: Text("Logout"),
-          onTap: () {
+          onTap: () {   
+             model.resetMyProducts();                       //reset the product of previously logged in user
+             Navigator.pushReplacementNamed(context, '/');   //move back to home page before loggin out
              model.logout();          
           }
         );
