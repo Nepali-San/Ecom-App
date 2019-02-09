@@ -19,7 +19,7 @@ class _ListProduct extends State<ListProduct> {
       icon: Icon(Icons.edit),
       onPressed: () {
         model.selectProduct(model.myproducts[index].id);
-        Navigator.pushReplacementNamed(context, '/editProduct').then((_) {
+        Navigator.pushNamed(context, '/editProduct').then((_) {
           model.selectProduct(null);
         });
       },
