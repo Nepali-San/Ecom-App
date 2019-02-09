@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:practise_app1/pages/login_page.dart';
-import 'package:practise_app1/pages/product_edit_tab.dart';
+import 'package:practise_app1/pages/product_edit_page.dart';
 import 'package:practise_app1/pages/product_page.dart';
 import 'package:practise_app1/pages/products_admin_page.dart';
 import 'package:practise_app1/scoped-models/main.dart';
