@@ -4,7 +4,7 @@ class Product {
   final String title, description, image, id;
   final double price;
   final bool isFavorite;
-  final String userEmail, userId;
+  final String userEmail, userId,address;
 
   Product(
       {@required this.id,
@@ -14,5 +14,6 @@ class Product {
       @required this.price,
       @required this.userEmail,
       @required this.userId,
+      @required this.address,
       this.isFavorite = false});
 }

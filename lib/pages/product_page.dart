@@ -61,7 +61,7 @@ class ProductPage extends StatelessWidget {
                       ProductTitle(product.title),
                       SizedBox(height: 8.0),
                       Text(
-                        'Butwal,Traffic-chowk | \$ ${product.price.toString()}',
+                        '${product.address} | \$ ${product.price.toString()}',
                         style: TextStyle(
                             color: Colors.grey, fontWeight: FontWeight.bold),
                       ),

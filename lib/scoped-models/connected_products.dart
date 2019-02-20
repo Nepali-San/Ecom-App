@@ -16,8 +16,8 @@ class ConnectedProducts extends Model {
   User _authenticatedUser;
   bool _isLoading = false;
 
-  Future<bool> addproduct(
-      String title, String description, String image, double price) async {
+  Future<bool> addproduct(String title, String description, String image,
+      double price, String address) async {
     _isLoading = true;
     notifyListeners();
 
@@ -29,12 +29,13 @@ class ConnectedProducts extends Model {
       'price': price,
       'userEmail': _authenticatedUser.email,
       'userId': _authenticatedUser.id,
+      'address': address,
     };
 
     try {
       final http.Response response = await http.post(
           'https://flutter-products-ec3de.firebaseio.com/products.json?auth=${_authenticatedUser.token}',
-          body: json.encode(productData));      
+          body: json.encode(productData));
 
       final Map<String, dynamic> responseData = json.decode(response.body);
 
@@ -45,6 +46,7 @@ class ConnectedProducts extends Model {
           price: price,
           userId: _authenticatedUser.id,
           userEmail: _authenticatedUser.email,
+          address: address,
           image: image);
 
       _products.add(p);
@@ -64,7 +66,7 @@ class ConnectedProducts extends Model {
 }
 
 mixin ProductModel on ConnectedProducts {
-  bool _showFavourites = false; 
+  bool _showFavourites = false;
 
   //use _myProducts to keep a seprate list of product belonging to _authenticate user
   //rem to update it while updating database.
@@ -119,7 +121,7 @@ mixin ProductModel on ConnectedProducts {
 
     _myProducts.removeAt(backupIndex);
     _products.removeAt(productbackupIndex);
-  
+
     _selProductId = null;
     notifyListeners();
     return http
@@ -149,6 +151,7 @@ mixin ProductModel on ConnectedProducts {
     String description,
     String image,
     double price,
+    String address,
   ) async {
     _isLoading = true;
     notifyListeners();
@@ -168,6 +171,7 @@ mixin ProductModel on ConnectedProducts {
         'price': price,
         'userId': selectedProduct.userId,
         'userEmail': selectedProduct.userEmail,
+        'address': address,
         'wishListUsers': json.decode(res.body),
       };
 
@@ -177,6 +181,7 @@ mixin ProductModel on ConnectedProducts {
           description: description,
           price: price,
           image: imgUrl,
+          address: address,
           userEmail: selectedProduct.userEmail,
           userId: selectedProduct.userId);
 
@@ -189,7 +194,7 @@ mixin ProductModel on ConnectedProducts {
       _products[selectedProductIndex] = updatedProductlocal;
 
       //same as above, we are not only having a getter for it...
-      int myProductIndex = _myProducts.indexWhere((Product p){
+      int myProductIndex = _myProducts.indexWhere((Product p) {
         return p.id == selectedProductId;
       });
 
@@ -231,6 +236,7 @@ mixin ProductModel on ConnectedProducts {
         price: selectedProduct.price,
         userEmail: selectedProduct.userEmail,
         userId: selectedProduct.userId,
+        address: selectedProduct.address,
         isFavorite: newFavouriteStatus);
 
     _products[selectedProductIndex] = updatedProduct;
@@ -257,6 +263,7 @@ mixin ProductModel on ConnectedProducts {
           price: selectedProduct.price,
           userEmail: selectedProduct.userEmail,
           userId: selectedProduct.userId,
+          address: selectedProduct.address,
           isFavorite: !newFavouriteStatus);
 
       _products[selectedProductIndex] = updatedProduct;
@@ -299,6 +306,7 @@ mixin ProductModel on ConnectedProducts {
           price: productData['price'],
           userId: productData['userId'],
           userEmail: productData['userEmail'],
+          address: productData['address'],
           isFavorite: productData['wishListUsers'] != null
               ? (productData['wishListUsers'] as Map<String, dynamic>)
                   .containsKey(_authenticatedUser.id)

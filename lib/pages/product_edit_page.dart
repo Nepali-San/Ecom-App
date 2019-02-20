@@ -13,7 +13,8 @@ class _EditProduct extends State<EditProduct> {
     'title': null,
     'description': null,
     'imgUrl': 'images/food.jpg',
-    'price': null
+    'price': null,
+    'address': null
   };
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -66,6 +67,21 @@ class _EditProduct extends State<EditProduct> {
     );
   }
 
+  Widget _buildAddressTextField(Product product) {
+    return TextFormField(
+      decoration: InputDecoration(labelText: "Address"),
+      initialValue: product == null ? "" : product.address,
+      validator: (String value) {
+        if (value.trim().isEmpty) {
+          return 'Address is not valid';
+        }
+      },
+      onSaved: (String value) {
+        _formData['address'] = value;
+      },
+    );
+  }
+
   Widget _buildEditButton() {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
@@ -103,6 +119,7 @@ class _EditProduct extends State<EditProduct> {
               _buildTitleTextField(product),
               _buildDescriptionTextField(product),
               _buildPriceTextField(product),
+              _buildAddressTextField(product),
               SizedBox(height: 10.0),
               _buildEditButton(),
             ],
@@ -138,34 +155,20 @@ class _EditProduct extends State<EditProduct> {
     if (!_formKey.currentState.validate()) return;
 
     _formKey.currentState.save();
-    if (selectedProductIndex != null) {
-      updateProduct(
-        _formData['title'],
-        _formData['description'],
-        _formData['imgUrl'],
-        _formData['price'],
-      ).then((bool isSuccess) {
-        if (isSuccess) {
-          Navigator.pop(context);
-          Navigator.pushReplacementNamed(context, '/');
-        } else {
-          dialogonFailure("Try editing products later");
-        }
-      });
-    } else {
-      addProduct(
-        _formData['title'],
-        _formData['description'],
-        _formData['imgUrl'],
-        _formData['price'],
-      ).then((bool isSuccess) {
-        if (isSuccess) {
-          Navigator.pushReplacementNamed(context, '/');
-        } else {
-          dialogonFailure("Try adding products later");
-        }
-      });
-    }
+    updateProduct(
+      _formData['title'],
+      _formData['description'],
+      _formData['imgUrl'],
+      _formData['price'],
+      _formData['address'],
+    ).then((bool isSuccess) {
+      if (isSuccess) {
+        Navigator.pop(context);
+        Navigator.pushReplacementNamed(context, '/');
+      } else {
+        dialogonFailure("Try editing products later");
+      }
+    });
   }
 
   @override

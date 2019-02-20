@@ -12,7 +12,8 @@ class _AddProduct extends State<AddProduct> {
     'title': null,
     'description': null,
     'imgUrl': 'images/food.jpg',
-    'price': null
+    'price': null,
+    'address': null
   };
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -62,6 +63,20 @@ class _AddProduct extends State<AddProduct> {
     );
   }
 
+  Widget _buildAddressTextField() {
+    return TextFormField(
+      decoration: InputDecoration(labelText: "Address"),
+      validator: (String value) {
+        if (value.trim().isEmpty) {
+          return 'Invalid address';
+        }
+      },
+      onSaved: (String value) {
+        _formData['address'] = value;
+      },
+    );
+  }
+
   Widget _buildEditButton() {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
@@ -99,6 +114,7 @@ class _AddProduct extends State<AddProduct> {
               _buildTitleTextField(),
               _buildDescriptionTextField(),
               _buildPriceTextField(),
+              _buildAddressTextField(),
               SizedBox(height: 10.0),
               _buildEditButton(),
             ],
@@ -140,6 +156,7 @@ class _AddProduct extends State<AddProduct> {
       _formData['description'],
       _formData['imgUrl'],
       _formData['price'],
+      _formData['address'],
     ).then((bool isSuccess) {
       if (isSuccess) {
         Navigator.pushReplacementNamed(context, '/');

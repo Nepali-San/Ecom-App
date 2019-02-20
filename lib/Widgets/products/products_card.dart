@@ -60,7 +60,7 @@ class ProductsCard extends StatelessWidget {
               ],
             ),
           ),
-          AddressTag('Butwal - 6, Traffic-chowk'),
+          AddressTag(product.address),
           SizedBox(width: 6.0),
           Text(product.userEmail),
           ScopedModelDescendant<MainModel>(
