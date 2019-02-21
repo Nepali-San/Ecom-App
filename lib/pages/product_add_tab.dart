@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:practise_app1/Widgets/form_inputs/image.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:practise_app1/scoped-models/main.dart';
 
@@ -20,7 +21,7 @@ class _AddProduct extends State<AddProduct> {
 
   Widget _buildTitleTextField() {
     return TextFormField(
-      decoration: InputDecoration(labelText: "Product Title"),
+      decoration: InputDecoration(labelText: "Title/Name"),
       validator: (String value) {
         if (value.trim().length == 0 || value.length < 5) {
           return 'Title is required and should be more than 5 characters.';
@@ -35,7 +36,7 @@ class _AddProduct extends State<AddProduct> {
   Widget _buildDescriptionTextField() {
     return TextFormField(
       maxLines: 5,
-      decoration: InputDecoration(labelText: "Product Description"),
+      decoration: InputDecoration(labelText: "Description"),
       validator: (String value) {
         if (value.isEmpty || value.length < 10) {
           return 'Description is required and should be more than 10 characters.';
@@ -49,7 +50,7 @@ class _AddProduct extends State<AddProduct> {
 
   Widget _buildPriceTextField() {
     return TextFormField(
-      decoration: InputDecoration(labelText: "Product Price"),
+      decoration: InputDecoration(labelText: "Price"),
       validator: (String value) {
         if (value.isEmpty ||
             !RegExp(r'^(?:[1-9]\d*|0)?(?:\.\d+)?$').hasMatch(value)) {
@@ -115,6 +116,8 @@ class _AddProduct extends State<AddProduct> {
               _buildDescriptionTextField(),
               _buildPriceTextField(),
               _buildAddressTextField(),
+              SizedBox(height: 6.0),
+              ImageInput(),
               SizedBox(height: 10.0),
               _buildEditButton(),
             ],
