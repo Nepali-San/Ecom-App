@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageInput extends StatefulWidget {
+
+  final Function setImage;
+
+  ImageInput(this.setImage);
+
   @override
   State<StatefulWidget> createState() {
     return _ImageInput();
@@ -18,6 +23,7 @@ class _ImageInput extends State<ImageInput> {
       setState(() {
         _imageFile = image;
       });
+      widget.setImage(image);
       Navigator.pop(context);
     });
   }

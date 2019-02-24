@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:http_parser/http_parser.dart';
 import 'package:practise_app1/models/product.dart';
 import 'package:practise_app1/models/user.dart';
 import 'package:http/http.dart' as http;
@@ -7,6 +10,7 @@ import '../models/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rxdart/subjects.dart';
 import 'dart:async';
+import 'package:mime/mime.dart';
 
 class ConnectedProducts extends Model {
   List<Product> _products = [];
@@ -16,16 +20,55 @@ class ConnectedProducts extends Model {
   User _authenticatedUser;
   bool _isLoading = false;
 
-  Future<bool> addproduct(String title, String description, String image,
+  Future<Map<String, dynamic>> uploadImage(File image,
+      {String imagePath}) async {
+    final mimeTypeData = lookupMimeType(image.path).split('/');
+    final imageUploadRequest = http.MultipartRequest(
+        'POST',
+        Uri.parse(
+            'https://us-central1-flutter-products-ec3de.cloudfunctions.net/storeImage'));
+    final file = await http.MultipartFile.fromPath('image', image.path,
+        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
+    imageUploadRequest.files.add(file);
+    if (imagePath != null) {
+      imageUploadRequest.fields['imagePath'] = Uri.encodeComponent(imagePath);
+    }
+    imageUploadRequest.headers['Authorization'] =
+        'Bearer ${_authenticatedUser.token}';
+    try {
+      final streamedResponse = await imageUploadRequest.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        print("Something went wrong");
+        print(json.decode(response.body));        
+      }
+      final responseData = json.decode(response.body);
+      return responseData;
+    } catch (error) {
+      print(error);
+      return null;
+    }
+  }
+
+  Future<bool> addproduct(String title, String description, File image,
       double price, String address) async {
     _isLoading = true;
     notifyListeners();
 
+    final uploadData = await uploadImage(image);
+    if(uploadData == null){
+      print("Upload failed");
+      return false;
+    }
+
+
+
     final Map<String, dynamic> productData = {
       'title': title,
       'description': description,
-      'image':
-          "https://www.popsci.com/sites/popsci.com/files/styles/1000_1x_/public/images/2018/02/valentines-day-2057745_1920.jpg?itok=IFpejN6h&fc=50,50",
+      'imagePath':
+          uploadData['imagePath'],
+      'imageUrl':uploadData['imageUrl'],
       'price': price,
       'userEmail': _authenticatedUser.email,
       'userId': _authenticatedUser.id,
@@ -47,7 +90,7 @@ class ConnectedProducts extends Model {
           userId: _authenticatedUser.id,
           userEmail: _authenticatedUser.email,
           address: address,
-          image: image);
+          image: uploadData['imageUrl']);
 
       _products.add(p);
       _myProducts.add(p);

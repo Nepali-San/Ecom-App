@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:practise_app1/Widgets/form_inputs/image.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -12,7 +14,7 @@ class _AddProduct extends State<AddProduct> {
   final Map<String, dynamic> _formData = {
     'title': null,
     'description': null,
-    'imgUrl': 'images/food.jpg',
+    'imgUrl': null,
     'price': null,
     'address': null
   };
@@ -117,7 +119,7 @@ class _AddProduct extends State<AddProduct> {
               _buildPriceTextField(),
               _buildAddressTextField(),
               SizedBox(height: 6.0),
-              ImageInput(),
+              ImageInput(_setImage),
               SizedBox(height: 10.0),
               _buildEditButton(),
             ],
@@ -150,7 +152,7 @@ class _AddProduct extends State<AddProduct> {
   void _submitForm(
       Function addProduct, Function updateProduct, Function selectProduct,
       [int selectedProductIndex]) {
-    if (!_formKey.currentState.validate()) return;
+    if (!_formKey.currentState.validate() || (_formData['imgUrl'] == null)) return;
 
     _formKey.currentState.save();
 
@@ -167,6 +169,10 @@ class _AddProduct extends State<AddProduct> {
         dialogonFailure("Try adding products later");
       }
     });
+  }
+
+  void _setImage(File image){
+    _formData['imgUrl'] = image;
   }
 
   @override

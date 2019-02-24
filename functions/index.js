@@ -7,12 +7,25 @@ const fs = require("fs");
 const fbAdmin = require("firebase-admin");
 const uuid = require("uuid/v4");
 
-const gcconfig = {
-  projectId: "flutter-products-ec3de",
-  keyFilename: "flutter-products.json"
-};
+// const gcconfig = {
+//   projectId: "flutter-products-ec3de",
+//   keyFilename: "flutter-products.json"
+// };
 
-//const gcs = require("@google-cloud/storage")(gcconfig);
+const projectId = "flutter-products-ec3de";
+const keyFilename = "flutter-products.json";
+
+const {
+  Storage
+} = require('@google-cloud/storage');
+
+
+const gcs = new Storage({
+  projectId: projectId,
+  keyFilename: keyFilename
+});
+
+// const gcs = require("@google-cloud/storage")(gcconfig);
 
 fbAdmin.initializeApp({
   credential: fbAdmin.credential.cert(require("./flutter-products.json"))
