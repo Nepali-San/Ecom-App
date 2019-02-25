@@ -15,10 +15,7 @@ const uuid = require("uuid/v4");
 const projectId = "flutter-products-ec3de";
 const keyFilename = "flutter-products.json";
 
-const {
-  Storage
-} = require('@google-cloud/storage');
-
+const { Storage } = require("@google-cloud/storage");
 
 const gcs = new Storage({
   projectId: projectId,
@@ -103,3 +100,13 @@ exports.storeImage = functions.https.onRequest((req, res) => {
     return busboy.end(req.rawBody);
   });
 });
+
+exports.deleteImage = functions.database
+  .ref("/products/{productId}")
+  .onDelete(snapshot => {
+    const imageData = snapshot.val();
+    const imagePath = imageData.imagePath;
+
+    const bucket = gcs.bucket('flutter-products-ec3de.appspot.com');
+    return bucket.file(imagePath).delete();
+  });
