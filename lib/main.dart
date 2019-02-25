@@ -71,7 +71,6 @@ class _MyAppState extends State<MyApp> {
               },
             );
           }
-
           return null;
         },
         onUnknownRoute: (RouteSettings settings) {

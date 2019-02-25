@@ -12,7 +12,7 @@ class _LoginPage extends State<LoginPage> {
   Map<String, dynamic> _formData = {
     'email': null,
     'password': null,
-    'acceptTerms': false,
+    'acceptTerms': true,
   };
 
   AuthMode _authMode = AuthMode.Login;
@@ -163,7 +163,9 @@ class _LoginPage extends State<LoginPage> {
                         ? _buildConfirmPasswordTextfield()
                         : Container(),
                     SizedBox(height: 10.0),
-                    _buildAcceptSwitch(),
+                    _authMode == AuthMode.Signup
+                        ? _buildAcceptSwitch()
+                        : Container(),
                     SizedBox(height: 10.0),
                     FlatButton(
                       child: Text(
@@ -173,6 +175,11 @@ class _LoginPage extends State<LoginPage> {
                           _authMode = _authMode == AuthMode.Login
                               ? AuthMode.Signup
                               : AuthMode.Login;
+
+                          if (_authMode == AuthMode.Login)
+                            _formData['acceptTerms'] = true;
+                          else
+                            _formData['acceptTerms'] = false;
                         });
                       },
                     ),
