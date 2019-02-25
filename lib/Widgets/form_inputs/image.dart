@@ -108,7 +108,7 @@ class _ImageInput extends State<ImageInput> {
               ),
               SizedBox(width: 5.0),
               Text(
-                "Add Image",
+                widget.product == null ? "Add/Change Image" : "Change Image",
                 style: TextStyle(color: buttonColor),
               ),
             ],

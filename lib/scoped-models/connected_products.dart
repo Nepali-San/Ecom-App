@@ -193,17 +193,28 @@ mixin ProductModel on ConnectedProducts {
   Future<bool> updateProduct(
     String title,
     String description,
-    String image,
+    File image,
     double price,
     String address,
   ) async {
     _isLoading = true;
     notifyListeners();
 
-    String imgUrl =
-        "https://www.popsci.com/sites/popsci.com/files/styles/1000_1x_/public/images/2018/02/valentines-day-2057745_1920.jpg?itok=IFpejN6h&fc=50,50";
+    String imagePath = selectedProduct.imagePath;
+    String imageUrl = selectedProduct.imageUrl;
 
     try {
+      if (image != null) {
+        final uploadData = await uploadImage(image);      
+
+        if (uploadData == null) {
+          throw "error";
+        }
+
+        imagePath =uploadData['imagePath'];
+        imageUrl =uploadData['imageUrl'];
+      }
+
       //we retrieve the current wishListUsers(users that has favourited this product) and then put it in updated list.
       http.Response res = await http.get(
           "https://flutter-products-ec3de.firebaseio.com/products/${selectedProduct.id}/wishListUsers.json?auth=${_authenticatedUser.token}");
@@ -211,7 +222,8 @@ mixin ProductModel on ConnectedProducts {
       final Map<String, dynamic> updateProduct = {
         'title': title,
         'description': description,
-        'imageUrl': imgUrl,
+        'imageUrl': imageUrl,
+        'imagePath': imagePath,
         'price': price,
         'userId': selectedProduct.userId,
         'userEmail': selectedProduct.userEmail,
@@ -224,7 +236,7 @@ mixin ProductModel on ConnectedProducts {
           title: title,
           description: description,
           price: price,
-          imageUrl: imgUrl,
+          imageUrl: imageUrl,
           imagePath: 'imagePath',
           address: address,
           userEmail: selectedProduct.userEmail,
@@ -347,7 +359,6 @@ mixin ProductModel on ConnectedProducts {
       }
 
       productListData.forEach((String productId, dynamic productData) {
-        
         final Product product = new Product(
           id: productId,
           title: productData['title'],
@@ -366,7 +377,7 @@ mixin ProductModel on ConnectedProducts {
 
         fetchedProductList.add(product);
       });
-      
+
       _products = fetchedProductList;
 
       _myProducts = _products.where((Product product) {
