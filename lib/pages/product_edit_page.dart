@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:practise_app1/Widgets/form_inputs/image.dart';
 import 'package:practise_app1/models/product.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:practise_app1/scoped-models/main.dart';
@@ -12,17 +15,28 @@ class _EditProduct extends State<EditProduct> {
   final Map<String, dynamic> _formData = {
     'title': null,
     'description': null,
-    'imgUrl': 'images/food.jpg',
+    'imgFile': null,
     'price': null,
     'address': null
   };
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final _titleTextController = TextEditingController();
+  final _descriptionTextController = TextEditingController();
+  final _priceTextController = TextEditingController();
+  final _addressTextController = TextEditingController();
 
   Widget _buildTitleTextField(Product product) {
+    if (_titleTextController.text.trim() == "") {
+      _titleTextController.text = product.title;
+    } else {
+      _titleTextController.text = _titleTextController.text.trim();
+    }
+
     return TextFormField(
       decoration: InputDecoration(labelText: "Product Title"),
-      initialValue: product == null ? "" : product.title,
+      // initialValue: product.title,
+      controller: _titleTextController,
       validator: (String value) {
         if (value.trim().length == 0 || value.length < 5) {
           return 'Title is required and should be more than 5 characters.';
@@ -35,10 +49,16 @@ class _EditProduct extends State<EditProduct> {
   }
 
   Widget _buildDescriptionTextField(Product product) {
+    if (_descriptionTextController.text.trim() == "") {
+      _descriptionTextController.text = product.description;
+    } else {
+      _descriptionTextController.text = _descriptionTextController.text.trim();
+    }
     return TextFormField(
       maxLines: 5,
       decoration: InputDecoration(labelText: "Product Description"),
-      initialValue: product == null ? "" : product.description,
+      // initialValue: product.description,
+      controller: _descriptionTextController,
       validator: (String value) {
         if (value.isEmpty || value.length < 10) {
           return 'Description is required and should be more than 10 characters.';
@@ -51,9 +71,15 @@ class _EditProduct extends State<EditProduct> {
   }
 
   Widget _buildPriceTextField(Product product) {
+    if (_priceTextController.text.trim() == "") {
+      _priceTextController.text = product.price.toString();
+    } else {
+      _priceTextController.text = _priceTextController.text.trim();
+    }
     return TextFormField(
       decoration: InputDecoration(labelText: "Product Price"),
-      initialValue: product == null ? "" : product.price.toString(),
+      // initialValue: product.price.toString(),
+      controller: _priceTextController,
       validator: (String value) {
         if (value.isEmpty ||
             !RegExp(r'^(?:[1-9]\d*|0)?(?:\.\d+)?$').hasMatch(value)) {
@@ -68,9 +94,15 @@ class _EditProduct extends State<EditProduct> {
   }
 
   Widget _buildAddressTextField(Product product) {
+    if (_addressTextController.text.trim() == "") {
+      _addressTextController.text = product.address;
+    } else {
+      _addressTextController.text = _addressTextController.text.trim();
+    }
     return TextFormField(
       decoration: InputDecoration(labelText: "Address"),
-      initialValue: product == null ? "" : product.address,
+      // initialValue: product.address,
+      controller: _addressTextController,
       validator: (String value) {
         if (value.trim().isEmpty) {
           return 'Address is not valid';
@@ -93,8 +125,8 @@ class _EditProduct extends State<EditProduct> {
                 color: Theme.of(context).accentColor,
                 textColor: Colors.black,
                 child: Text("Submit"),
-                onPressed: () => _submitForm(model.addproduct,
-                    model.updateProduct, model.selectProduct, selectedIndex),
+                onPressed: () =>
+                    _submitForm(model.updateProduct, selectedIndex),
               );
       },
     );
@@ -120,6 +152,8 @@ class _EditProduct extends State<EditProduct> {
               _buildDescriptionTextField(product),
               _buildPriceTextField(product),
               _buildAddressTextField(product),
+              SizedBox(height: 6.0),
+              ImageInput(_setImage, product),
               SizedBox(height: 10.0),
               _buildEditButton(),
             ],
@@ -127,6 +161,10 @@ class _EditProduct extends State<EditProduct> {
         ),
       ),
     );
+  }
+
+  void _setImage(File image) {
+    _formData['imgFile'] = image;
   }
 
   void dialogonFailure(String msg) {
@@ -149,18 +187,16 @@ class _EditProduct extends State<EditProduct> {
     );
   }
 
-  void _submitForm(
-      Function addProduct, Function updateProduct, Function selectProduct,
-      [int selectedProductIndex]) {
+  void _submitForm(Function updateProduct, int selectedProductIndex) {
     if (!_formKey.currentState.validate()) return;
 
     _formKey.currentState.save();
     updateProduct(
-      _formData['title'],
-      _formData['description'],
-      _formData['imgUrl'],
-      _formData['price'],
-      _formData['address'],
+      _titleTextController.text,
+      _descriptionTextController.text,
+      _formData['imgFile'],
+      double.parse(_priceTextController.text),
+      _addressTextController.text,
     ).then((bool isSuccess) {
       if (isSuccess) {
         Navigator.pop(context);
@@ -175,14 +211,11 @@ class _EditProduct extends State<EditProduct> {
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
-        final Widget pageContent =
-            _buildPageContent(context, model.selectedProduct);
-
         return Scaffold(
           appBar: AppBar(
             title: Text("Edit product"),
           ),
-          body: pageContent,
+          body: _buildPageContent(context, model.selectedProduct),
         );
       },
     );

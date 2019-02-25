@@ -14,7 +14,7 @@ import 'package:mime/mime.dart';
 
 class ConnectedProducts extends Model {
   List<Product> _products = [];
-  List<Product> _myProducts;
+  List<Product> _myProducts = [];
 
   String _selProductId;
   User _authenticatedUser;
@@ -40,7 +40,7 @@ class ConnectedProducts extends Model {
       final response = await http.Response.fromStream(streamedResponse);
       if (response.statusCode != 200 && response.statusCode != 201) {
         print("Something went wrong");
-        print(json.decode(response.body));        
+        print(json.decode(response.body));
       }
       final responseData = json.decode(response.body);
       return responseData;
@@ -56,19 +56,18 @@ class ConnectedProducts extends Model {
     notifyListeners();
 
     final uploadData = await uploadImage(image);
-    if(uploadData == null){
-      print("Upload failed");
+
+    if (uploadData == null) {
+      _isLoading = false;
+      notifyListeners();
       return false;
     }
-
-
 
     final Map<String, dynamic> productData = {
       'title': title,
       'description': description,
-      'imagePath':
-          uploadData['imagePath'],
-      'imageUrl':uploadData['imageUrl'],
+      'imagePath': uploadData['imagePath'],
+      'imageUrl': uploadData['imageUrl'],
       'price': price,
       'userEmail': _authenticatedUser.email,
       'userId': _authenticatedUser.id,
@@ -90,7 +89,8 @@ class ConnectedProducts extends Model {
           userId: _authenticatedUser.id,
           userEmail: _authenticatedUser.email,
           address: address,
-          image: uploadData['imageUrl']);
+          imagePath: uploadData['imagePath'],
+          imageUrl: uploadData['imageUrl']);
 
       _products.add(p);
       _myProducts.add(p);
@@ -102,6 +102,7 @@ class ConnectedProducts extends Model {
       return true;
     } catch (error) {
       _isLoading = false;
+      print(error);
       notifyListeners();
       return false;
     }
@@ -210,7 +211,7 @@ mixin ProductModel on ConnectedProducts {
       final Map<String, dynamic> updateProduct = {
         'title': title,
         'description': description,
-        'image': imgUrl,
+        'imageUrl': imgUrl,
         'price': price,
         'userId': selectedProduct.userId,
         'userEmail': selectedProduct.userEmail,
@@ -223,7 +224,8 @@ mixin ProductModel on ConnectedProducts {
           title: title,
           description: description,
           price: price,
-          image: imgUrl,
+          imageUrl: imgUrl,
+          imagePath: 'imagePath',
           address: address,
           userEmail: selectedProduct.userEmail,
           userId: selectedProduct.userId);
@@ -274,7 +276,8 @@ mixin ProductModel on ConnectedProducts {
     final updatedProduct = new Product(
         id: selectedProductId,
         title: selectedProduct.title,
-        image: selectedProduct.image,
+        imageUrl: selectedProduct.imageUrl,
+        imagePath: selectedProduct.imagePath,
         description: selectedProduct.description,
         price: selectedProduct.price,
         userEmail: selectedProduct.userEmail,
@@ -301,7 +304,8 @@ mixin ProductModel on ConnectedProducts {
       final updatedProduct = new Product(
           id: selectedProductId,
           title: selectedProduct.title,
-          image: selectedProduct.image,
+          imageUrl: selectedProduct.imageUrl,
+          imagePath: selectedProduct.imagePath,
           description: selectedProduct.description,
           price: selectedProduct.price,
           userEmail: selectedProduct.userEmail,
@@ -335,17 +339,21 @@ mixin ProductModel on ConnectedProducts {
       final Map<String, dynamic> productListData = json.decode(response.body);
 
       if (productListData == null) {
+        _products = [];
+        _myProducts = [];
         _isLoading = false;
         notifyListeners();
         return;
       }
 
       productListData.forEach((String productId, dynamic productData) {
+        
         final Product product = new Product(
           id: productId,
           title: productData['title'],
           description: productData['description'],
-          image: productData['image'],
+          imageUrl: productData['imageUrl'],
+          imagePath: productData['imagePath'],
           price: productData['price'],
           userId: productData['userId'],
           userEmail: productData['userEmail'],
@@ -355,9 +363,10 @@ mixin ProductModel on ConnectedProducts {
                   .containsKey(_authenticatedUser.id)
               : false,
         );
+
         fetchedProductList.add(product);
       });
-
+      
       _products = fetchedProductList;
 
       _myProducts = _products.where((Product product) {

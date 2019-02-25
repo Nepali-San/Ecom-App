@@ -12,8 +12,7 @@ class ListProduct extends StatefulWidget {
   }
 }
 
-class _ListProduct extends State<ListProduct> { 
-
+class _ListProduct extends State<ListProduct> {
   Widget _buildEditButton(BuildContext context, int index, MainModel model) {
     return IconButton(
       icon: Icon(Icons.edit),
@@ -60,7 +59,8 @@ class _ListProduct extends State<ListProduct> {
         children: <Widget>[
           ListTile(
             leading: CircleAvatar(
-                backgroundImage: NetworkImage(model.myproducts[index].image)),
+                backgroundImage:
+                    NetworkImage(model.myproducts[index].imageUrl)),
             title: Text(model.myproducts[index].title),
             subtitle: Text('\$ ${model.myproducts[index].price.toString()}'),
             trailing: _buildEditButton(context, index, model),
@@ -74,7 +74,7 @@ class _ListProduct extends State<ListProduct> {
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant(
-      builder: (BuildContext context, Widget child, MainModel model) {       
+      builder: (BuildContext context, Widget child, MainModel model) {
         return ListView.builder(
           itemBuilder: (BuildContext context, int index) =>
               _build(context, index, model),

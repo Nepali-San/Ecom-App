@@ -19,7 +19,7 @@ class _ProductPage extends State<ProductsPage>{
 
   @override
   initState(){
-    widget.model.fetchProducts();
+    widget.model.fetchProducts();    
     super.initState();
   }
 
@@ -54,8 +54,8 @@ class _ProductPage extends State<ProductsPage>{
           content = Products();
         }else if(model.isLoading){
           content = Center(child:CircularProgressIndicator());
-        }
-        return RefreshIndicator(child: content,onRefresh: model.fetchProducts,);        
+        }        
+        return RefreshIndicator(child: content,onRefresh: model.fetchProducts);        
       },
     );
   }

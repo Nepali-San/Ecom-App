@@ -14,59 +14,80 @@ class _AddProduct extends State<AddProduct> {
   final Map<String, dynamic> _formData = {
     'title': null,
     'description': null,
-    'imgUrl': null,
+    'imgFile': null,
     'price': null,
     'address': null
   };
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final _titleTextController = TextEditingController();
+  final _descriptionTextController = TextEditingController();
+  final _priceTextController = TextEditingController();
+  final _addressTextController = TextEditingController();
 
   Widget _buildTitleTextField() {
+    if (_titleTextController.text.trim() != "") {
+      _titleTextController.text = _titleTextController.text.trim();
+    }
+
     return TextFormField(
       decoration: InputDecoration(labelText: "Title/Name"),
+      controller: _titleTextController,
       validator: (String value) {
         if (value.trim().length == 0 || value.length < 5) {
           return 'Title is required and should be more than 5 characters.';
         }
       },
       onSaved: (String value) {
-        _formData['title'] = value;
+        _formData['title'] = value.trim();
       },
     );
   }
 
   Widget _buildDescriptionTextField() {
+    if (_descriptionTextController.text.trim() != "") {
+      _descriptionTextController.text = _descriptionTextController.text;
+    }
+
     return TextFormField(
       maxLines: 5,
       decoration: InputDecoration(labelText: "Description"),
+      controller: _descriptionTextController,
       validator: (String value) {
-        if (value.isEmpty || value.length < 10) {
+        if (value.trim().isEmpty || value.length < 10) {
           return 'Description is required and should be more than 10 characters.';
         }
       },
       onSaved: (String value) {
-        _formData['description'] = value;
+        _formData['description'] = value.trim();
       },
     );
   }
 
   Widget _buildPriceTextField() {
+    if (_priceTextController.text.trim() != "") {
+      _priceTextController.text = _priceTextController.text.trim();
+    }
     return TextFormField(
       decoration: InputDecoration(labelText: "Price"),
       validator: (String value) {
-        if (value.isEmpty ||
+        if (value.trim().isEmpty ||
             !RegExp(r'^(?:[1-9]\d*|0)?(?:\.\d+)?$').hasMatch(value)) {
           return 'Price is required and must be a number.';
         }
       },
+      controller: _priceTextController,
       keyboardType: TextInputType.number,
       onSaved: (String value) {
-        _formData['price'] = double.parse(value);
+        _formData['price'] = double.parse(value.trim());
       },
     );
   }
 
   Widget _buildAddressTextField() {
+    if (_addressTextController.text.trim() != "") {
+      _addressTextController.text = _addressTextController.text.trim();
+    }
     return TextFormField(
       decoration: InputDecoration(labelText: "Address"),
       validator: (String value) {
@@ -74,8 +95,9 @@ class _AddProduct extends State<AddProduct> {
           return 'Invalid address';
         }
       },
+      controller: _addressTextController,
       onSaved: (String value) {
-        _formData['address'] = value;
+        _formData['address'] = value.trim();
       },
     );
   }
@@ -83,16 +105,13 @@ class _AddProduct extends State<AddProduct> {
   Widget _buildEditButton() {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
-        int selectedIndex = model.selectedProductIndex;
-
         return model.isLoading
             ? Center(child: CircularProgressIndicator())
             : RaisedButton(
                 color: Theme.of(context).accentColor,
                 textColor: Colors.black,
                 child: Text("Submit"),
-                onPressed: () => _submitForm(model.addproduct,
-                    model.updateProduct, model.selectProduct, selectedIndex),
+                onPressed: () => _submitForm(model.addproduct),
               );
       },
     );
@@ -149,18 +168,17 @@ class _AddProduct extends State<AddProduct> {
     );
   }
 
-  void _submitForm(
-      Function addProduct, Function updateProduct, Function selectProduct,
-      [int selectedProductIndex]) {
-    if (!_formKey.currentState.validate() || (_formData['imgUrl'] == null)) return;
+  void _submitForm(Function addProduct) {
+    if (!_formKey.currentState.validate() || (_formData['imgFile'] == null))
+      return;
 
     _formKey.currentState.save();
 
     addProduct(
-      _formData['title'],
-      _formData['description'],
-      _formData['imgUrl'],
-      _formData['price'],
+      _titleTextController.text,
+      _descriptionTextController.text,
+      _formData['imgFile'],
+      double.parse(_priceTextController.text),
       _formData['address'],
     ).then((bool isSuccess) {
       if (isSuccess) {
@@ -171,8 +189,8 @@ class _AddProduct extends State<AddProduct> {
     });
   }
 
-  void _setImage(File image){
-    _formData['imgUrl'] = image;
+  void _setImage(File image) {
+    _formData['imgFile'] = image;
   }
 
   @override

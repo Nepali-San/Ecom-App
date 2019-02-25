@@ -2,12 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:practise_app1/models/product.dart';
 
 class ImageInput extends StatefulWidget {
-
   final Function setImage;
+  final Product product;
 
-  ImageInput(this.setImage);
+  ImageInput(this.setImage, [this.product]);
 
   @override
   State<StatefulWidget> createState() {
@@ -69,6 +70,25 @@ class _ImageInput extends State<ImageInput> {
   Widget build(BuildContext context) {
     Color buttonColor = Theme.of(context).primaryColor;
 
+    Widget imagePreview = Text("Please select an image");
+    if (_imageFile != null) {
+      imagePreview = Image.file(
+        _imageFile,
+        fit: BoxFit.cover,
+        height: 300.0,
+        width: MediaQuery.of(context).size.width,
+        alignment: Alignment.topCenter,
+      );
+    } else if (widget.product != null) {
+      imagePreview = Image.network(
+        widget.product.imageUrl,
+        fit: BoxFit.cover,
+        height: 300.0,
+        width: MediaQuery.of(context).size.width,
+        alignment: Alignment.topCenter,
+      );
+    }
+
     return Column(
       children: <Widget>[
         OutlineButton(
@@ -95,15 +115,7 @@ class _ImageInput extends State<ImageInput> {
           ),
         ),
         SizedBox(height: 10.0),
-        _imageFile == null
-            ? Text("Please ! pick an image.")
-            : Image.file(
-                _imageFile,
-                fit: BoxFit.cover,
-                height: 300.0,
-                width: MediaQuery.of(context).size.width,
-                alignment: Alignment.topCenter,
-              ),
+        imagePreview,
       ],
     );
   }
