@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:practise_app1/Widgets/ui_elements/product_title.dart';
 import 'package:practise_app1/models/product.dart';
-import 'package:scoped_model/scoped_model.dart';
-import 'package:practise_app1/scoped-models/main.dart';
 
 class ProductPage extends StatelessWidget {
   // void _showWarningDialog(BuildContext context) {
@@ -32,6 +30,9 @@ class ProductPage extends StatelessWidget {
   //   );
   // }
 
+  final Product product;
+  ProductPage(this.product);
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -39,41 +40,44 @@ class ProductPage extends StatelessWidget {
         Navigator.pop(context, false);
         return Future.value(false);
       },
-      child: ScopedModelDescendant<MainModel>(
-        builder: (BuildContext context, Widget child, MainModel model) {
-          final Product product = model.selectedProduct;
-          return Scaffold(
-            appBar: AppBar(
-              title: Text("Product Detail"),
-            ),
-            body: Column(
-              children: <Widget>[
-                FadeInImage(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("Product Detail"),
+        ),
+        body: Center(
+          child: Column(
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.all(5.0),
+                child: FadeInImage(
                   image: NetworkImage(product.imageUrl),
                   height: 300.0,
                   fit: BoxFit.cover,
                   placeholder: AssetImage('images/food.jpg'),
+                )
+              ),
+              Container(
+                margin: EdgeInsets.all(10.0),
+                child: Column(
+                  children: <Widget>[
+                    ProductTitle(product.title),
+                    SizedBox(height: 8.0),
+                    Text(
+                      '${product.address} | \$ ${product.price.toString()}',
+                      style: TextStyle(
+                          color: Colors.grey, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8.0),
+                    Text(
+                      product.description,
+                      textAlign: TextAlign.center,
+                    )
+                  ],
                 ),
-                Container(
-                  margin: EdgeInsets.all(10.0),
-                  child: Column(
-                    children: <Widget>[
-                      ProductTitle(product.title),
-                      SizedBox(height: 8.0),
-                      Text(
-                        '${product.address} | \$ ${product.price.toString()}',
-                        style: TextStyle(
-                            color: Colors.grey, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8.0),
-                      Text(product.description)
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

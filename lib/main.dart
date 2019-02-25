@@ -67,7 +67,7 @@ class _MyAppState extends State<MyApp> {
             _model.selectProduct(productId);
             return MaterialPageRoute<bool>(
               builder: (BuildContext context) {
-                return !_isAuthenticated ? LoginPage() : ProductPage();
+                return !_isAuthenticated ? LoginPage() : ProductPage(_model.selectedProduct);
               },
             );
           }
