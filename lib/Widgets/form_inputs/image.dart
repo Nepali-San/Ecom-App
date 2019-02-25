@@ -74,16 +74,16 @@ class _ImageInput extends State<ImageInput> {
     if (_imageFile != null) {
       imagePreview = Image.file(
         _imageFile,
-        fit: BoxFit.cover,
-        height: 300.0,
+        fit: BoxFit.fill,
+        height: 350.0,
         width: MediaQuery.of(context).size.width,
         alignment: Alignment.topCenter,
       );
     } else if (widget.product != null) {
       imagePreview = Image.network(
         widget.product.imageUrl,
-        fit: BoxFit.cover,
-        height: 300.0,
+        fit: BoxFit.fill,
+        height: 350.0,
         width: MediaQuery.of(context).size.width,
         alignment: Alignment.topCenter,
       );
