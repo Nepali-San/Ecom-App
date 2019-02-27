@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:practise_app1/scoped-models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FloatingButton extends StatefulWidget {
   @override
@@ -23,7 +24,15 @@ class _FloatingButton extends State<FloatingButton> {
               alignment: FractionalOffset.topCenter,
               child: FloatingActionButton(
                 heroTag: "contact",
-                onPressed: () {},
+                onPressed: () async {
+                  final url =
+                      "mailto:${model.selectedProduct.userEmail}?subject= Buy ${model.selectedProduct.title}";
+                  if (await canLaunch(url)) {
+                    await launch(url);
+                  } else {
+                    throw "Couldn't launch url";
+                  }
+                },
                 child: Icon(
                   Icons.mail,
                   color: Colors.white,
