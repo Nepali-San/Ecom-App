@@ -62,7 +62,7 @@ class ProductsCard extends StatelessWidget {
           ),
           AddressTag(product.address),
           SizedBox(width: 6.0),
-          Text(product.userEmail),
+          // Text(product.userEmail),
           ScopedModelDescendant<MainModel>(
             builder: (BuildContext context, Widget child, MainModel model) {
               return _buildActionButtons(context, model);

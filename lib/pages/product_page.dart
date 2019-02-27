@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:practise_app1/Widgets/products/prouduct_fab.dart';
 import 'package:practise_app1/Widgets/ui_elements/product_title.dart';
 import 'package:practise_app1/models/product.dart';
 
@@ -48,14 +49,13 @@ class ProductPage extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Container(
-                margin: EdgeInsets.all(5.0),
-                child: FadeInImage(
-                  image: NetworkImage(product.imageUrl),
-                  height: 300.0,
-                  fit: BoxFit.cover,
-                  placeholder: AssetImage('images/food.jpg'),
-                )
-              ),
+                  margin: EdgeInsets.all(5.0),
+                  child: FadeInImage(
+                    image: NetworkImage(product.imageUrl),
+                    height: 300.0,
+                    fit: BoxFit.cover,
+                    placeholder: AssetImage('images/food.jpg'),
+                  )),
               Container(
                 margin: EdgeInsets.all(10.0),
                 child: Column(
@@ -78,6 +78,7 @@ class ProductPage extends StatelessWidget {
             ],
           ),
         ),
+        floatingActionButton: FloatingButton(),
       ),
     );
   }

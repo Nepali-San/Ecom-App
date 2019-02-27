@@ -279,10 +279,8 @@ mixin ProductModel on ConnectedProducts {
     bool isCurrentFavourite = selectedProduct.isFavorite;
     bool newFavouriteStatus = !isCurrentFavourite;
 
-    String addLikeUrl =
-        "https://flutter-products-ec3de.firebaseio.com/products/$selectedProductId/wishListUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}";
-    String delLikeUrl =
-        "https://flutter-products-ec3de.firebaseio.com/products/$selectedProductId/wishListUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}";
+    String likeUrl =
+        "https://flutter-products-ec3de.firebaseio.com/products/$selectedProductId/wishListUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}";    
 
     //updating the product locally , revert it if not success...
     final updatedProduct = new Product(
@@ -304,12 +302,12 @@ mixin ProductModel on ConnectedProducts {
     try {
       if (newFavouriteStatus) {
         await http.put(
-          addLikeUrl,
+          likeUrl,
           body: json.encode(true),
         );
       } else {
         await http.delete(
-          delLikeUrl,
+          likeUrl,
         );
       }
     } catch (error) {
@@ -327,8 +325,7 @@ mixin ProductModel on ConnectedProducts {
 
       _products[selectedProductIndex] = updatedProduct;
       notifyListeners();
-    }
-    _selProductId = null;
+    }    
   }
 
   void toogelMode() {
