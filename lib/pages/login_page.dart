@@ -8,12 +8,22 @@ class LoginPage extends StatefulWidget {
   State<StatefulWidget> createState() => _LoginPage();
 }
 
-class _LoginPage extends State<LoginPage> {
+class _LoginPage extends State<LoginPage> with TickerProviderStateMixin {
   Map<String, dynamic> _formData = {
     'email': null,
     'password': null,
     'acceptTerms': true,
   };
+
+  AnimationController _animationController;
+
+  void initState() {
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 300),
+    );
+    super.initState();
+  }
 
   AuthMode _authMode = AuthMode.Login;
 
@@ -71,27 +81,36 @@ class _LoginPage extends State<LoginPage> {
   }
 
   Widget _buildConfirmPasswordTextfield() {
-    return TextFormField(
-        decoration: InputDecoration(
-          labelText: "Confirm Password",
-          filled: true,
-          fillColor: Colors.white,
-        ),
-        obscureText: true,
-        validator: (String value) {
-          if (value != _passwordTextController.text) {
-            return "password do not match!!!";
-          }
-        });
+    return FadeTransition(
+      opacity:
+          CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+      child: TextFormField(
+          decoration: InputDecoration(
+            labelText: "Confirm Password",
+            filled: true,
+            fillColor: Colors.white,
+          ),
+          obscureText: true,
+          validator: (String value) {
+            if (_authMode == AuthMode.Signup &&
+                value != _passwordTextController.text) {
+              return "password do not match!!!";
+            }
+          }),
+    );
   }
 
-  SwitchListTile _buildAcceptSwitch() {
-    return SwitchListTile(
-      value: _formData['acceptTerms'],
-      onChanged: (bool value) {
-        _formData['acceptTerms'] = value;
-      },
-      title: Text("Accept Terms"),
+  Widget _buildAcceptSwitch() {
+    return FadeTransition(
+      opacity:
+          CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+      child: SwitchListTile(
+        value: _formData['acceptTerms'],
+        onChanged: (bool value) {
+          _formData['acceptTerms'] = value;
+        },
+        title: Text("Accept Terms"),
+      ),
     );
   }
 
@@ -159,30 +178,28 @@ class _LoginPage extends State<LoginPage> {
                     SizedBox(height: 10.0),
                     _buildPasswordTextfield(),
                     SizedBox(height: 10.0),
-                    _authMode == AuthMode.Signup
-                        ? _buildConfirmPasswordTextfield()
-                        : Container(),
-                    SizedBox(height: 10.0),
-                    _authMode == AuthMode.Signup
-                        ? _buildAcceptSwitch()
-                        : Container(),
-                    SizedBox(height: 10.0),
+                    _buildConfirmPasswordTextfield(),
+                    SizedBox(height: 2.0),
+                    _buildAcceptSwitch(),
+                    SizedBox(height: 2.0),
                     FlatButton(
-                      child: Text(
-                          "Switch to ${_authMode == AuthMode.Login ? 'Signup' : 'Login'}"),
-                      onPressed: () {
-                        setState(() {
-                          _authMode = _authMode == AuthMode.Login
-                              ? AuthMode.Signup
-                              : AuthMode.Login;
-
-                          if (_authMode == AuthMode.Login)
-                            _formData['acceptTerms'] = true;
-                          else
-                            _formData['acceptTerms'] = false;
-                        });
-                      },
-                    ),
+                        child: Text(
+                            "Switch to ${_authMode == AuthMode.Login ? 'Signup' : 'Login'}"),
+                        onPressed: () {
+                          if (_authMode == AuthMode.Login) {
+                            setState(() {
+                              _authMode = AuthMode.Signup;
+                              _formData['acceptTerms'] = false;
+                            });
+                            _animationController.forward();
+                          } else {
+                            setState(() {
+                              _authMode = AuthMode.Login;
+                              _formData['acceptTerms'] = true;
+                            });
+                            _animationController.reverse();
+                          }
+                        }),
                     ScopedModelDescendant<MainModel>(
                       builder: (BuildContext context, Widget child,
                           MainModel model) {

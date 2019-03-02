@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:practise_app1/Widgets/ui_elements/custom_route.dart';
 import 'package:practise_app1/pages/login_page.dart';
 import 'package:practise_app1/pages/product_edit_page.dart';
 import 'package:practise_app1/pages/product_page.dart';
@@ -53,7 +54,7 @@ class _MyAppState extends State<MyApp> {
         },
         onGenerateRoute: (RouteSettings settings) {
           if (!_isAuthenticated) {
-            return MaterialPageRoute<bool>(
+            return CustomRoute<bool>(
               builder: (BuildContext context) => LoginPage(),
             );
           }
@@ -65,7 +66,7 @@ class _MyAppState extends State<MyApp> {
             final String productId = pathElements[2];
 
             _model.selectProduct(productId);
-            return MaterialPageRoute<bool>(
+            return CustomRoute<bool>(
               builder: (BuildContext context) {
                 return !_isAuthenticated ? LoginPage() : ProductPage(_model.selectedProduct);
               },
@@ -74,7 +75,7 @@ class _MyAppState extends State<MyApp> {
           return null;
         },
         onUnknownRoute: (RouteSettings settings) {
-          return MaterialPageRoute(
+          return CustomRoute(
             builder: (BuildContext context) =>
                 !_isAuthenticated ? LoginPage() : UnknownPage(),
           );
