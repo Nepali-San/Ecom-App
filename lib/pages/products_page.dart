@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:practise_app1/Widgets/products/products.dart';
-import 'package:practise_app1/Widgets/ui_elements/logout_listtile.dart';
+import 'package:practise_app1/Widgets/ui_elements/myDrawer.dart';
 import 'package:practise_app1/scoped-models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -23,28 +23,6 @@ class _ProductPage extends State<ProductsPage>{
     super.initState();
   }
 
-  Drawer _buildDrawer(BuildContext context) {
-    return Drawer(
-      child: Column(
-        children: <Widget>[
-          AppBar(
-            automaticallyImplyLeading: false,
-            title: Text("Choose"),
-          ),
-          ListTile(
-            leading: Icon(Icons.edit),
-            title: Text("Manage Product"),
-            onTap: () {
-              Navigator.pushReplacementNamed(context, '/admin');
-            },
-          ),
-          Divider(),
-          LogoutListTile(),
-        ],
-      ),
-    );
-  }
-
   Widget _buildProducts(){
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context,Widget child,MainModel model){
@@ -62,7 +40,7 @@ class _ProductPage extends State<ProductsPage>{
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        drawer: _buildDrawer(context),
+        drawer: MyDrawer(1),
         appBar: AppBar(
           title: Text("Products"),
           actions: <Widget>[
