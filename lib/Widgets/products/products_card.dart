@@ -7,10 +7,9 @@ import 'package:practise_app1/scoped-models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class ProductsCard extends StatelessWidget {
-  final Product product;
-  final int index;
+  final Product product;  
 
-  ProductsCard(this.product, this.index);
+  ProductsCard(this.product);
 
   ButtonBar _buildActionButtons(BuildContext context, MainModel model) {
     return ButtonBar(
@@ -25,12 +24,12 @@ class ProductsCard extends StatelessWidget {
           color: Colors.green,
         ),
         IconButton(
-          icon: Icon(model.displayProducts[index].isFavorite
+          icon: Icon(product.isFavorite
               ? Icons.favorite
               : Icons.favorite_border),
           color: Colors.red,
           onPressed: () {
-            model.selectProduct(model.displayProducts[index].id);
+            model.selectProduct(product.id);
             model.toogleFavourite();
           },
         ),

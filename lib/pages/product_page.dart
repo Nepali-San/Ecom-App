@@ -6,32 +6,6 @@ import 'package:practise_app1/Widgets/ui_elements/product_title.dart';
 import 'package:practise_app1/models/product.dart';
 
 class ProductPage extends StatelessWidget {
-  // void _showWarningDialog(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text("Are you sure ?"),
-  //         content: Text("This action cannot be undone."),
-  //         actions: <Widget>[
-  //           FlatButton(
-  //             child: Text('Discard'),
-  //             onPressed: () {
-  //               Navigator.pop(context);
-  //             },
-  //           ),
-  //           FlatButton(
-  //             child: Text('Continue'),
-  //             onPressed: () {
-  //               Navigator.pop(context);
-  //               Navigator.pop(context, true);
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   final Product product;
   ProductPage(this.product);
@@ -44,16 +18,13 @@ class ProductPage extends StatelessWidget {
         return Future.value(false);
       },
       child: Scaffold(
-        // appBar: AppBar(
-        //   title: Text("${product.title}"),
-        // ),
         body: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
               expandedHeight: 256.0,
               pinned: true,
               flexibleSpace: FlexibleSpaceBar(
-                title: Text(product.title),                
+                title: Text(product.title,),                
                 background: Hero(
                   tag: product.id,
                   child: FadeInImage(
