@@ -159,7 +159,7 @@ class _LoginPage extends State<LoginPage> with TickerProviderStateMixin {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_authMode == AuthMode.Login ? "Login" : "Sign Up"),
+        title: Text(_authMode == AuthMode.Login ? "Login" : "Register"),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -175,16 +175,19 @@ class _LoginPage extends State<LoginPage> with TickerProviderStateMixin {
                 child: Column(
                   children: <Widget>[
                     _buildEmailTextfield(),
-                    SizedBox(height: 10.0),
+                    SizedBox(height: 8.0),
                     _buildPasswordTextfield(),
-                    SizedBox(height: 10.0),
+                    SizedBox(height: 8.0),
                     _buildConfirmPasswordTextfield(),
-                    SizedBox(height: 2.0),
-                    _buildAcceptSwitch(),
-                    SizedBox(height: 2.0),
+                    // SizedBox(height: 2.0),
+                    _buildAcceptSwitch(),                  
                     FlatButton(
                         child: Text(
-                            "Switch to ${_authMode == AuthMode.Login ? 'Signup' : 'Login'}"),
+                          _authMode == AuthMode.Login
+                              ? 'Need an account ? Register'
+                              : 'Have an account ? Login ',
+                              style: TextStyle(color: Colors.blue,fontSize: 16.0),
+                        ),
                         onPressed: () {
                           if (_authMode == AuthMode.Login) {
                             setState(() {
@@ -209,7 +212,7 @@ class _LoginPage extends State<LoginPage> with TickerProviderStateMixin {
                                 color: Theme.of(context).primaryColor,
                                 child: Text(_authMode == AuthMode.Login
                                     ? "Login"
-                                    : "Sign Up"),
+                                    : "Register"),
                                 onPressed: () =>
                                     _buildSubmitform(model.authenticate),
                               );
