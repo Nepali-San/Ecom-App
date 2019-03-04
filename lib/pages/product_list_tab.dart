@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:practise_app1/Widgets/ui_elements/custom_route.dart';
+import 'package:practise_app1/pages/product_edit_page.dart';
 import 'package:practise_app1/scoped-models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -18,7 +20,12 @@ class _ListProduct extends State<ListProduct> {
       icon: Icon(Icons.edit),
       onPressed: () {
         model.selectProduct(model.myproducts[index].id);
-        Navigator.pushNamed(context, '/editProduct').then((_) {
+        // Navigator.pushNamed(context, '/editProduct').then((_) {
+        //   model.selectProduct(null);
+        // });
+        Navigator.push(context, CustomRoute(builder: (BuildContext context) {
+          return EditProduct();
+        })).then((_) {
           model.selectProduct(null);
         });
       },
@@ -58,9 +65,12 @@ class _ListProduct extends State<ListProduct> {
       child: Column(
         children: <Widget>[
           ListTile(
-            leading: CircleAvatar(
-                backgroundImage:
-                    NetworkImage(model.myproducts[index].imageUrl)),
+            leading: Hero(
+              tag: model.myproducts[index].id,
+              child: CircleAvatar(
+                  backgroundImage:
+                      NetworkImage(model.myproducts[index].imageUrl)),
+            ),
             title: Text(model.myproducts[index].title),
             subtitle: Text('\$ ${model.myproducts[index].price.toString()}'),
             trailing: _buildEditButton(context, index, model),

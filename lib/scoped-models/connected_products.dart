@@ -489,8 +489,7 @@ mixin UserModel on ConnectedProducts {
       final DateTime now = DateTime.now();
       final DateTime expiryTimeParsed = DateTime.parse(expiryTime);
       if (expiryTimeParsed.isBefore(now)) {
-        _authenticatedUser = null;
-        print("old token");
+        _authenticatedUser = null;  
         notifyListeners();
         return;
       }
