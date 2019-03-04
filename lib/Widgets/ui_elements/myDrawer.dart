@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:practise_app1/Widgets/ui_elements/custom_route.dart';
 import 'package:practise_app1/Widgets/ui_elements/logout_listtile.dart';
 import 'package:practise_app1/models/user.dart';
+import 'package:practise_app1/pages/about_us.dart';
 import 'package:practise_app1/pages/products_admin_page.dart';
 import 'package:practise_app1/scoped-models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -41,7 +42,7 @@ class MyDrawer extends StatelessWidget {
                     context); //when you are already in that page, just close the drawer.
               } else {
                 Navigator.pop(context);
-                Navigator.pop(context);               
+                Navigator.pop(context);
               }
             },
           ),
@@ -62,11 +63,40 @@ class MyDrawer extends StatelessWidget {
               } else {
                 //if any other page included...
                 Navigator.pop(context);
+                Navigator.pop(context);
                 // Navigator.pushReplacementNamed(context, '/admin');
                 Navigator.push(
                   context,
                   CustomRoute(builder: (BuildContext context) {
                     return AdminPage(model);
+                  }),
+                );
+              }
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.book),
+            title: Text("About us"),
+            onTap: () {
+              if (drawerNo == 3) {
+                Navigator.pop(
+                    context); //when you are already in that page, just close the drawer.
+              } else if (drawerNo == 1) {
+                Navigator.pop(context);
+                // Navigator.pushNamed(context, '/admin');
+                Navigator.push(context,
+                    CustomRoute(builder: (BuildContext context) {
+                  return Aboutus();
+                }));
+              } else {
+                //if any other page included...
+                Navigator.pop(context);
+                Navigator.pop(context);
+                // Navigator.pushReplacementNamed(context, '/admin');
+                Navigator.push(
+                  context,
+                  CustomRoute(builder: (BuildContext context) {
+                    return Aboutus();
                   }),
                 );
               }
