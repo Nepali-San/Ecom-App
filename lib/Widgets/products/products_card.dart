@@ -48,7 +48,7 @@ class ProductsCard extends StatelessWidget {
               image: NetworkImage(product.imageUrl),
               height: 300.0,
               fit: BoxFit.cover,
-              placeholder: AssetImage('images/food.jpg'),
+              placeholder: AssetImage('images/cat.jpg'),
             ),
           ),
           Container(

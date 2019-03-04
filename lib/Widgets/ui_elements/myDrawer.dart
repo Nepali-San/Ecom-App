@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:practise_app1/Widgets/ui_elements/logout_listtile.dart';
+import 'package:practise_app1/models/user.dart';
+import 'package:practise_app1/scoped-models/main.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class MyDrawer extends StatelessWidget {
   final int drawerNo;
 
   MyDrawer(this.drawerNo);
 
+  Widget _buildDrawerHeader(User user) {
+    return UserAccountsDrawerHeader(
+      accountName: Text("${user.id}"),
+      accountEmail: Text("${user.email}"),
+      currentAccountPicture: CircleAvatar(
+        backgroundImage: AssetImage('images/default_profile_pic.jpeg'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: Column(
         children: <Widget>[
-          AppBar(
-            automaticallyImplyLeading: false,
-            title: Text("Choose"),
-          ),
+          ScopedModelDescendant<MainModel>(
+              builder: (BuildContext context, Widget child, MainModel model) {
+            return _buildDrawerHeader(model.user);
+          }),
           ListTile(
             leading: Icon(Icons.shop),
             title: Text("All Products"),

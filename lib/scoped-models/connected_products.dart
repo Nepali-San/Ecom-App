@@ -205,14 +205,14 @@ mixin ProductModel on ConnectedProducts {
 
     try {
       if (image != null) {
-        final uploadData = await uploadImage(image);      
+        final uploadData = await uploadImage(image);
 
         if (uploadData == null) {
           throw "error";
         }
 
-        imagePath =uploadData['imagePath'];
-        imageUrl =uploadData['imageUrl'];
+        imagePath = uploadData['imagePath'];
+        imageUrl = uploadData['imageUrl'];
       }
 
       //we retrieve the current wishListUsers(users that has favourited this product) and then put it in updated list.
@@ -280,7 +280,7 @@ mixin ProductModel on ConnectedProducts {
     bool newFavouriteStatus = !isCurrentFavourite;
 
     String likeUrl =
-        "https://flutter-products-ec3de.firebaseio.com/products/$selectedProductId/wishListUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}";    
+        "https://flutter-products-ec3de.firebaseio.com/products/$selectedProductId/wishListUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}";
 
     //updating the product locally , revert it if not success...
     final updatedProduct = new Product(
@@ -325,7 +325,7 @@ mixin ProductModel on ConnectedProducts {
 
       _products[selectedProductIndex] = updatedProduct;
       notifyListeners();
-    }    
+    }
   }
 
   void toogelMode() {
@@ -393,14 +393,14 @@ mixin ProductModel on ConnectedProducts {
 mixin UserModel on ConnectedProducts {
   Timer _authTimer;
 
+  User get user {
+    return _authenticatedUser;
+  }
+
   PublishSubject<bool> _userSubject = PublishSubject();
 
   PublishSubject<bool> get userSubject {
     return _userSubject;
-  }
-
-  User get user {
-    return _authenticatedUser;
   }
 
   Future<Map<String, dynamic>> authenticate(String email, String password,

@@ -6,7 +6,6 @@ import 'package:practise_app1/Widgets/ui_elements/product_title.dart';
 import 'package:practise_app1/models/product.dart';
 
 class ProductPage extends StatelessWidget {
-
   final Product product;
   ProductPage(this.product);
 
@@ -24,14 +23,16 @@ class ProductPage extends StatelessWidget {
               expandedHeight: 256.0,
               pinned: true,
               flexibleSpace: FlexibleSpaceBar(
-                title: Text(product.title,),                
+                title: Text(
+                  product.title,
+                ),
                 background: Hero(
                   tag: product.id,
                   child: FadeInImage(
                     image: NetworkImage(product.imageUrl),
                     height: 300.0,
                     fit: BoxFit.cover,
-                    placeholder: AssetImage('images/food.jpg'),
+                    placeholder: AssetImage('images/cat.jpg'),
                   ),
                 ),
               ),
@@ -42,7 +43,7 @@ class ProductPage extends StatelessWidget {
                   margin: EdgeInsets.all(10.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[                      
+                    children: <Widget>[
                       ProductTitle(product.title),
                       SizedBox(height: 8.0),
                       Text(
