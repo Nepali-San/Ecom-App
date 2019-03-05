@@ -517,6 +517,7 @@ mixin UserModel on ConnectedProducts {
     _authTimer.cancel();
     _userSubject.add(false);
     _selProductId = null;    
+    _isLoading =false;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('token');
     prefs.remove('email');
