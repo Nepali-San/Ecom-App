@@ -182,7 +182,8 @@ class _AddProduct extends State<AddProduct> {
       _formData['address'],
     ).then((bool isSuccess) {
       if (isSuccess) {
-        Navigator.pushReplacementNamed(context, '/');
+        // Navigator.pushReplacementNamed(context, '/');
+        Navigator.pop(context);
       } else {
         dialogonFailure("Try adding products later");
       }

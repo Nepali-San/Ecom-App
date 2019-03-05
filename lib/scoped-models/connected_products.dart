@@ -513,13 +513,14 @@ mixin UserModel on ConnectedProducts {
 
   void logout() async {
     _authenticatedUser = null;
+    _isLoading = false;
     _authTimer.cancel();
     _userSubject.add(false);
-    _selProductId = null;
+    _selProductId = null;    
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('token');
     prefs.remove('email');
-    prefs.remove('id');
+    prefs.remove('id');    
   }
 
   void setAuthTimeout(int time) {

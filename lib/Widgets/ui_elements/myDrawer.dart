@@ -8,9 +8,9 @@ import 'package:practise_app1/scoped-models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class MyDrawer extends StatelessWidget {
-  final int drawerNo;
+  final int pageNo;
 
-  MyDrawer(this.drawerNo);
+  MyDrawer(this.pageNo);
 
   Widget _buildDrawerHeader(User user) {
     return UserAccountsDrawerHeader(
@@ -37,12 +37,12 @@ class MyDrawer extends StatelessWidget {
             leading: Icon(Icons.shop),
             title: Text("All Products"),
             onTap: () {
-              if (drawerNo == 1) {
+              if (pageNo == 1) {
                 Navigator.pop(
                     context); //when you are already in that page, just close the drawer.
               } else {
-                Navigator.pop(context);
-                Navigator.pop(context);
+                Navigator.pop(context); //close the drawer
+                Navigator.pop(context); //close current page
               }
             },
           ),
@@ -50,22 +50,18 @@ class MyDrawer extends StatelessWidget {
             leading: Icon(Icons.edit),
             title: Text("Manage Product"),
             onTap: () {
-              if (drawerNo == 2) {
+              if (pageNo == 2) {
                 Navigator.pop(
                     context); //when you are already in that page, just close the drawer.
-              } else if (drawerNo == 1) {
+              } else if (pageNo == 1) {
                 Navigator.pop(context);
-                // Navigator.pushNamed(context, '/admin');
                 Navigator.push(context,
                     CustomRoute(builder: (BuildContext context) {
                   return AdminPage(model);
                 }));
               } else {
-                //if any other page included...
                 Navigator.pop(context);
-                Navigator.pop(context);
-                // Navigator.pushReplacementNamed(context, '/admin');
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
                   CustomRoute(builder: (BuildContext context) {
                     return AdminPage(model);
@@ -78,22 +74,18 @@ class MyDrawer extends StatelessWidget {
             leading: Icon(Icons.book),
             title: Text("About us"),
             onTap: () {
-              if (drawerNo == 3) {
+              if (pageNo == 3) {
                 Navigator.pop(
                     context); //when you are already in that page, just close the drawer.
-              } else if (drawerNo == 1) {
+              } else if (pageNo == 1) {
                 Navigator.pop(context);
-                // Navigator.pushNamed(context, '/admin');
                 Navigator.push(context,
                     CustomRoute(builder: (BuildContext context) {
                   return Aboutus();
                 }));
               } else {
-                //if any other page included...
                 Navigator.pop(context);
-                Navigator.pop(context);
-                // Navigator.pushReplacementNamed(context, '/admin');
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
                   CustomRoute(builder: (BuildContext context) {
                     return Aboutus();
@@ -103,7 +95,7 @@ class MyDrawer extends StatelessWidget {
             },
           ),
           Divider(),
-          LogoutListTile(),
+          LogoutListTile(pageNo),
         ],
       ),
     );

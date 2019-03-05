@@ -4,6 +4,9 @@ import 'package:practise_app1/scoped-models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class LogoutListTile extends StatelessWidget {
+  final int no;
+  LogoutListTile(this.no);
+
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
@@ -11,11 +14,14 @@ class LogoutListTile extends StatelessWidget {
         return ListTile(
           leading: Icon(Icons.exit_to_app),
           title: Text("Logout"),
-          onTap: () {   
-             model.resetMyProducts();                       //reset the product of previously logged in user
-             Navigator.pushReplacementNamed(context, '/');   //move back to home page before loggin out
-             model.logout();          
-          }
+          onTap: () {
+            if ((no != 1)) {
+              Navigator.pop(context); //close the drawer
+            }
+            model.resetMyProducts();
+            model.logout();
+            Navigator.pop(context);
+          },
         );
       },
     );

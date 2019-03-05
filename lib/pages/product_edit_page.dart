@@ -200,7 +200,7 @@ class _EditProduct extends State<EditProduct> {
     ).then((bool isSuccess) {
       if (isSuccess) {
         Navigator.pop(context);
-        Navigator.pushReplacementNamed(context, '/');
+        // Navigator.pushReplacementNamed(context, '/');
       } else {
         dialogonFailure("Try editing products later");
       }
