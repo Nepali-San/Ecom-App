@@ -199,8 +199,7 @@ class _EditProduct extends State<EditProduct> {
       _addressTextController.text,
     ).then((bool isSuccess) {
       if (isSuccess) {
-        Navigator.pop(context);
-        // Navigator.pushReplacementNamed(context, '/');
+        Navigator.pop(context);       
       } else {
         dialogonFailure("Try editing products later");
       }

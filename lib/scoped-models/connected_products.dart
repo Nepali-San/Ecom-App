@@ -202,6 +202,7 @@ mixin ProductModel on ConnectedProducts {
 
     String imagePath = selectedProduct.imagePath;
     String imageUrl = selectedProduct.imageUrl;
+    bool likeState = selectedProduct.isFavorite;
 
     try {
       if (image != null) {
@@ -237,10 +238,11 @@ mixin ProductModel on ConnectedProducts {
           description: description,
           price: price,
           imageUrl: imageUrl,
-          imagePath: 'imagePath',
+          imagePath: imagePath,
           address: address,
           userEmail: selectedProduct.userEmail,
-          userId: selectedProduct.userId);
+          userId: selectedProduct.userId,
+          isFavorite: likeState);
 
       await http.put(
           'https://flutter-products-ec3de.firebaseio.com/products/${selectedProduct.id}.json?auth=${_authenticatedUser.token}',
@@ -489,7 +491,7 @@ mixin UserModel on ConnectedProducts {
       final DateTime now = DateTime.now();
       final DateTime expiryTimeParsed = DateTime.parse(expiryTime);
       if (expiryTimeParsed.isBefore(now)) {
-        _authenticatedUser = null;  
+        _authenticatedUser = null;
         notifyListeners();
         return;
       }
@@ -516,12 +518,12 @@ mixin UserModel on ConnectedProducts {
     _isLoading = false;
     _authTimer.cancel();
     _userSubject.add(false);
-    _selProductId = null;    
-    _isLoading =false;
+    _selProductId = null;
+    _isLoading = false;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('token');
     prefs.remove('email');
-    prefs.remove('id');    
+    prefs.remove('id');
   }
 
   void setAuthTimeout(int time) {
