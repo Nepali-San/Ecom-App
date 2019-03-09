@@ -14,7 +14,7 @@ class MyDrawer extends StatelessWidget {
 
   Widget _buildDrawerHeader(User user) {
     return UserAccountsDrawerHeader(
-      accountName: Text("${user.id}"),
+      accountName: Text("Anonymous"),
       accountEmail: Text("${user.email}"),
       currentAccountPicture: CircleAvatar(
         backgroundImage: AssetImage('images/default_profile_pic.jpeg'),

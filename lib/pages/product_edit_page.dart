@@ -154,7 +154,7 @@ class _EditProduct extends State<EditProduct> {
               _buildAddressTextField(product),
               SizedBox(height: 6.0),
               ImageInput(_setImage, product),
-              SizedBox(height: 10.0),
+              SizedBox(height: 6.0),
               _buildEditButton(),
             ],
           ),
